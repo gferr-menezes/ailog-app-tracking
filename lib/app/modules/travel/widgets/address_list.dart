@@ -5,20 +5,36 @@ import 'package:intl/intl.dart';
 
 import '../controllers/travel_controller.dart';
 
-class AddressList extends StatelessWidget {
+class AddressList extends StatefulWidget {
   const AddressList({Key? key}) : super(key: key);
 
   @override
+  State<AddressList> createState() => _AddressListState();
+}
+
+class _AddressListState extends State<AddressList> {
+  var travelController = Get.find<TravelController>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var travel = travelController.travel;
+      var checkTravelInitialized = travelController.existTravelInitialized;
+
+      if (checkTravelInitialized) {
+        travelController.getAddresses(travelId: travel.id!);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var travelController = Get.find<TravelController>();
-    var travel = travelController.travel;
-
-    travelController.getAddresses(travelId: travel.id!);
-    var addresses = travelController.addresses;
-
     return SizedBox.expand(
       child: Obx(
         () {
+          var addresses = travelController.addresses;
           return travelController.loadingGetAddresses
               ? const CustomLoading()
               : ListView.builder(

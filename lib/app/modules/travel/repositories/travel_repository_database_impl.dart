@@ -1,5 +1,6 @@
 import '../../../database/database_sqlite.dart';
 import '../models/address_model.dart';
+import '../models/geolocation_model.dart';
 import '../models/toll_model.dart';
 import '../models/travel_model.dart';
 import './travel_repository_database.dart';
@@ -90,7 +91,7 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
   }
 
   @override
-  Future<List<TravelModel>?> getTravels({String? plate, String? status, String? id}) async {
+  Future<List<TravelModel>?> getTravels({String? plate, String? status, int? id}) async {
     final db = await DatabaseSQLite().openConnection();
     final List<TravelModel> travels = [];
     final List<AddressModel> addresses = [];
@@ -112,7 +113,7 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
 
     final whereString = where.join(' AND ');
 
-    final whereArgs = <String>[];
+    final whereArgs = <dynamic>[];
 
     if (plate != null) {
       whereArgs.add(plate.toLowerCase());
@@ -210,5 +211,60 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
     }
 
     return tollsData.isEmpty ? null : tolls;
+  }
+
+  @override
+  Future<void> insertGeolocations({required List<GeolocationModel> geolocations}) async {
+    final db = await DatabaseSQLite().openConnection();
+    await db.transaction<void>((txn) async {
+      for (final geolocation in geolocations) {
+        await txn.insert('geolocations', {
+          'latitude': geolocation.latitude,
+          'longitude': geolocation.longitude,
+          'collection_date': geolocation.collectionDate.toIso8601String(),
+          'travel_id': geolocation.travelId,
+          'status_send_api': geolocation.statusSendApi,
+          'date_send_api': geolocation.dateSendApi?.toIso8601String(),
+        });
+      }
+    });
+  }
+
+  @override
+  Future<List<GeolocationModel>?> getGeolocations({int? travelId, String? statusSendApi}) async {
+    final db = await DatabaseSQLite().openConnection();
+    final geolocations = <GeolocationModel>[];
+    List<Map<String, Object?>> geolocationsData;
+
+    if (travelId != null) {
+      geolocationsData = await db.query('geolocations', where: 'travel_id = ?', whereArgs: [travelId]);
+    } else {
+      geolocationsData = await db.query('geolocations', where: 'status_send_api = ?', whereArgs: [statusSendApi]);
+    }
+
+    if (geolocationsData.isNotEmpty) {
+      for (var geolocation in geolocationsData) {
+        geolocations.add(GeolocationModel.fromJson(geolocation));
+      }
+    }
+    return geolocationsData.isEmpty ? null : geolocations;
+  }
+
+  @override
+  Future<void> updateGeolocations({required List<GeolocationModel> geolocations}) async {
+    final db = await DatabaseSQLite().openConnection();
+    await db.transaction<void>((txn) async {
+      for (final geolocation in geolocations) {
+        await txn.update(
+          'geolocations',
+          {
+            'status_send_api': geolocation.statusSendApi,
+            'date_send_api': geolocation.dateSendApi?.toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [geolocation.id],
+        );
+      }
+    });
   }
 }

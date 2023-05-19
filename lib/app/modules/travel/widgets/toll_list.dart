@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

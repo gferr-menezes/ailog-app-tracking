@@ -27,7 +27,7 @@ class GeolocationModel {
         longitude = json['longitude'],
         collectionDate = DateTime.parse(json['collection_date']),
         statusSendApi = json['status_send_api'] ?? StatusSendApi.pending.name,
-        dateSendApi = json['date_send_api'];
+        dateSendApi = json['date_send_api'] != null ? DateTime.parse(json['date_send_api']) : null;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};

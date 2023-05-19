@@ -31,7 +31,7 @@ class TravelService {
     }
 
     if (status == ResponseStatusApi.SUCESSO.name) {
-      final travelData = result!['viagens'] as List;
+      final travelData = result['viagens'] as List;
       List<TravelModel> travels = [];
       List<AddressModel> addresses = [];
       List<TollModel> tolls = [];
@@ -165,7 +165,7 @@ class TravelService {
     await _travelRepositoryDatabase.insertTravel(travel);
   }
 
-  Future<List<TravelModel>?> getTravels({String? plate, String? status, String? id}) async {
+  Future<List<TravelModel>?> getTravels({String? plate, String? status, int? id}) async {
     var travels = await _travelRepositoryDatabase.getTravels(plate: plate, status: status, id: id);
     return travels;
   }

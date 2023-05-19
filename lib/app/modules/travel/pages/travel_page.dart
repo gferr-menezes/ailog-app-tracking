@@ -1,3 +1,4 @@
+import 'package:ailog_app_tracking/app/modules/travel/controllers/geolocation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,11 +18,18 @@ class TravelPage extends StatefulWidget {
 
 class _TravelPageState extends State<TravelPage> {
   final TravelController travelController = Get.find<TravelController>();
+  final GeolocationController geolocationController = Get.find<GeolocationController>();
 
   @override
   void initState() {
     super.initState();
-    travelController.checkTravelInitialized();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      travelController.checkTravelInitialized();
+    });
+
+    // geolocationController.collectLatitudeLongitude();
+    geolocationController.sendGeolocationsPending();
   }
 
   @override
@@ -49,24 +57,35 @@ class _TravelPageState extends State<TravelPage> {
                               child: DefaultTabController(
                                 length: 2,
                                 child: Scaffold(
-                                  appBar: AppBar(
-                                    backgroundColor: context.theme.primaryColorLight,
-                                    flexibleSpace: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        TabBar(
-                                          indicatorColor: context.theme.primaryColor,
-                                          labelColor: Colors.black,
-                                          tabs: const [
-                                            Tab(
-                                              text: 'ENDEREÇOS',
-                                            ),
-                                            Tab(text: 'PEDÁGIOS'),
+                                  appBar: PreferredSize(
+                                      preferredSize: const Size.fromHeight(40),
+                                      child: AppBar(
+                                        backgroundColor: context.theme.primaryColorLight,
+                                        automaticallyImplyLeading: false,
+                                        flexibleSpace: Column(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            TabBar(
+                                              indicatorColor: context.theme.primaryColor,
+                                              labelColor: Colors.black,
+                                              tabs: const [
+                                                SizedBox(
+                                                  height: 30,
+                                                  child: Tab(
+                                                    text: 'ENDEREÇOS',
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 30,
+                                                  child: Tab(
+                                                    text: 'PEDÁGIOS',
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                           ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
+                                        ),
+                                      )),
                                   body: const TabBarView(
                                     children: [
                                       AddressList(),

@@ -1,3 +1,4 @@
+import 'package:ailog_app_tracking/app/modules/travel/pages/lat_long_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,6 +16,7 @@ class HomeController extends GetxController {
   int get tabIndex => _tabIndex.value;
   final _tabs = [
     '/travel',
+    '/lat-long',
   ];
 
   set tabIndex(int index) {
@@ -27,6 +29,14 @@ class HomeController extends GetxController {
       return GetPageRoute(
         settings: settings,
         page: () => const TravelPage(),
+        binding: TravelBinding(),
+        transition: Transition.fadeIn,
+      );
+    }
+    if (settings.name == '/lat-long') {
+      return GetPageRoute(
+        settings: settings,
+        page: () => const LatLongPage(),
         binding: TravelBinding(),
         transition: Transition.fadeIn,
       );
