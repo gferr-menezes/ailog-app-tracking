@@ -57,7 +57,9 @@ class TravelRepositoryImpl implements TravelRepository {
 
       final Response response = await _restClient.post('/enviarPontos', dataSend);
 
-      log(response.body.toString());
+      print("#################response.body: ${response.body}");
+
+      //log(response.body.toString());
 
       var result = response.body;
       if (result == null || result['status'] != 'SUCESSO') {

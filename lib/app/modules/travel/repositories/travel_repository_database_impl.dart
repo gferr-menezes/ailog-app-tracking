@@ -80,6 +80,8 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
             'value_manual': toll.valueManual,
             'accept_automatic_billing': toll.acceptAutomaticBilling,
             'accept_payment_proximity': toll.acceptPaymentProximity,
+            'latitude': toll.latitude,
+            'longitude': toll.longitude,
           });
         }
       }
@@ -138,8 +140,9 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
             final newAddress = {...address};
             // get client
             final client = await db.query('clients', where: 'address_id = ?', whereArgs: [newAddress['id']]);
-            if (client.isNotEmpty) {
-              newAddress['client'] = client.first;
+            if (client.isNotEmpty && client.first['name'] != null) {
+              var clientData = client.first;
+              newAddress['client'] = clientData;
             }
 
             addresses.add(AddressModel.fromJson(newAddress));
@@ -215,10 +218,11 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
 
   @override
   Future<void> insertGeolocations({required List<GeolocationModel> geolocations}) async {
-    final db = await DatabaseSQLite().openConnection();
-    await db.transaction<void>((txn) async {
+    try {
+      final db = await DatabaseSQLite().openConnection();
+
       for (final geolocation in geolocations) {
-        await txn.insert('geolocations', {
+        await db.insert('geolocations', {
           'latitude': geolocation.latitude,
           'longitude': geolocation.longitude,
           'collection_date': geolocation.collectionDate.toIso8601String(),
@@ -227,7 +231,25 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
           'date_send_api': geolocation.dateSendApi?.toIso8601String(),
         });
       }
-    });
+
+      // await db.transaction<void>((txn) async {
+      //   for (final geolocation in geolocations) {
+      //     await txn.insert('geolocations', {
+      //       'latitude': geolocation.latitude,
+      //       'longitude': geolocation.longitude,
+      //       'collection_date': geolocation.collectionDate.toIso8601String(),
+      //       'travel_id': geolocation.travelId,
+      //       'status_send_api': geolocation.statusSendApi,
+      //       'date_send_api': geolocation.dateSendApi?.toIso8601String(),
+      //     });
+      //   }
+      // });
+
+      print('insertGeolocations success');
+    } catch (e) {
+      print('insertGeolocations error');
+      throw Exception(e);
+    }
   }
 
   @override
@@ -266,5 +288,19 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
         );
       }
     });
+  }
+
+  @override
+  Future<void> updateTravel({required TravelModel travel}) async {
+    final db = await DatabaseSQLite().openConnection();
+
+    await db.update(
+      'travels',
+      {
+        'status': travel.status,
+      },
+      where: 'id = ?',
+      whereArgs: [travel.id],
+    );
   }
 }

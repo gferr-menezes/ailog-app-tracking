@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -38,6 +40,40 @@ class TollList extends StatelessWidget {
                             ),
                             const Divider(),
                             ListTile(
+                              trailing: PopupMenuButton(
+                                itemBuilder: (context) {
+                                  return [
+                                    PopupMenuItem(
+                                      value: 'show_map',
+                                      child: Row(
+                                        children: const [
+                                          Icon(
+                                            Icons.map,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text('Exibir no mapa'),
+                                        ],
+                                      ),
+                                    ),
+                                  ];
+                                },
+                                onSelected: (String value) {
+                                  if (value == 'show_map') {
+                                    if (toll.latitude != null && toll.longitude != null) {
+                                      Get.toNamed(
+                                        '/travel/map',
+                                        arguments: {
+                                          'latitude': toll.latitude,
+                                          'longitude': toll.longitude,
+                                          'origin': 'toll_list',
+                                        },
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
                               title: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [

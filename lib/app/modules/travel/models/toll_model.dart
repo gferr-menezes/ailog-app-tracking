@@ -13,6 +13,8 @@ class TollModel {
   double valueManual;
   bool? acceptAutomaticBilling;
   bool? acceptPaymentProximity;
+  double? latitude;
+  double? longitude;
 
   TollModel({
     this.id,
@@ -29,6 +31,8 @@ class TollModel {
     required this.valueManual,
     this.acceptAutomaticBilling,
     this.acceptPaymentProximity,
+    this.latitude,
+    this.longitude,
   });
 
   TollModel.fromJson(Map<String, dynamic> json)
@@ -45,7 +49,9 @@ class TollModel {
         valueTag = json['value_tag'],
         valueManual = json['value_manual'],
         acceptAutomaticBilling = json['accept_automatic_billing'] == 1 ? true : false,
-        acceptPaymentProximity = json['accept_payment_proximity'] == 1 ? true : false;
+        acceptPaymentProximity = json['accept_payment_proximity'] == 1 ? true : false,
+        latitude = json['latitude'],
+        longitude = json['longitude'];
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
@@ -62,11 +68,13 @@ class TollModel {
     data['value_manual'] = valueManual;
     data['accept_automatic_billing'] = acceptAutomaticBilling;
     data['accept_payment_proximity'] = acceptPaymentProximity;
+    data['latitude'] = latitude;
+    data['longitude'] = longitude;
     return data;
   }
 
   @override
   String toString() {
-    return 'TollModel{id: $id, travelId: $travelId, travelIdApi: $travelIdApi, tollName: $tollName, passOrder: $passOrder, quantityAxes: $quantityAxes, ailogId: $ailogId, concessionaire: $concessionaire, highway: $highway, datePassage: $datePassage, valueTag: $valueTag, valueManual: $valueManual, acceptAutomaticBilling: $acceptAutomaticBilling, acceptPaymentProximity: $acceptPaymentProximity}';
+    return 'TollModel{id: $id, travelId: $travelId, travelIdApi: $travelIdApi, tollName: $tollName, passOrder: $passOrder, quantityAxes: $quantityAxes, ailogId: $ailogId, concessionaire: $concessionaire, highway: $highway, datePassage: $datePassage, valueTag: $valueTag, valueManual: $valueManual, acceptAutomaticBilling: $acceptAutomaticBilling, acceptPaymentProximity: $acceptPaymentProximity, latitude: $latitude, longitude: $longitude}';
   }
 }

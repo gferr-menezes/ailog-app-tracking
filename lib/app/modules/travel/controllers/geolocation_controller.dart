@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:ailog_app_tracking/app/common/geolocation.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/geolocation_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/travel_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/services/geolocation_service.dart';
 import 'package:ailog_app_tracking/app/modules/travel/services/travel_service.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -21,11 +24,13 @@ class GeolocationController extends GetxController {
       : _travelService = travelService,
         _geolocationService = geolocationService;
 
-  Future<void> collectLatitudeLongitude() async {
+  Future<void> collectLatitudeLongitude(Position position) async {
     final List<TravelModel>? travels;
     final List<GeolocationModel> geolocations = [];
 
     final permission = await PermissionController.checkGeolocationPermission();
+
+    print('#################permission: $permission');
     if (permission.isDenied) {
       return;
     }
@@ -34,7 +39,8 @@ class GeolocationController extends GetxController {
       return;
     }
 
-    final position = await Geolocation.getCurrentPosition();
+    //final position = await Geolocation.getCurrentPosition();
+    print(position.toString());
     if (position == null) {
       return;
     }
@@ -59,15 +65,17 @@ class GeolocationController extends GetxController {
         geolocation.dateSendApi = collectionDate;
       }
       await _geolocationService.saveGeolocations(geolocations: geolocations);
+      print('################# success send api');
     } catch (e) {
+      print('################# error: $e');
       // error send api
       await _geolocationService.saveGeolocations(geolocations: geolocations);
     }
   }
 
-  Future<void> getGelocations({required int travelId}) async {
+  Future<void> getGelocations({required int travelId, bool showLoading = true}) async {
     try {
-      loadingGeolocations = true;
+      loadingGeolocations = showLoading;
       final geolocationsData = await _geolocationService.getGeolocations(travelId: travelId);
       if (geolocationsData != null) {
         geolocations = geolocationsData;

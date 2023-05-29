@@ -1,7 +1,7 @@
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionController {
-  Future<bool> getGeolocationPermission() async {
+  static Future<bool> getGeolocationPermission() async {
     var check = await Permission.locationWhenInUse.status;
 
     if (check == PermissionStatus.denied) {

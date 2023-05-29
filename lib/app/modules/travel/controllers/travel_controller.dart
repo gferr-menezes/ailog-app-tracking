@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,7 +24,7 @@ class TravelController extends GetxController {
   final _addresses = <AddressModel>[].obs;
   final _tolls = <TollModel>[].obs;
 
-  void checkTravelInitialized() async {
+  Future<void> checkTravelInitialized() async {
     try {
       loadingCheckTravelInitialized = true;
       final travels = await _travelService.getTravels(status: StatusTravel.inProgress.name);
@@ -36,15 +38,26 @@ class TravelController extends GetxController {
   }
 
   // process to start travel
-  Future<void> startTravel(String plate) async {
+  Future<List<TravelModel>?> startTravel({required String plate, String? travelIdApi}) async {
     try {
       loadingStartingTravel = true;
 
-      final travels = await _travelService.startTravel(plate);
+      final travels = await _travelService.startTravel(plate.toUpperCase());
 
-      if (travels != null && travels.isNotEmpty) {
-        for (var travel in travels) {
+      if (travelIdApi != null) {
+        final travel = travels?.firstWhere((element) => element.travelIdApi == travelIdApi);
+        if (travel != null) {
           await _travelService.saveTravel(travel);
+        }
+      } else {
+        if (travels != null && travels.isNotEmpty) {
+          if (travels.length > 1) {
+            return travels;
+          } else {
+            for (var travel in travels) {
+              await _travelService.saveTravel(travel);
+            }
+          }
         }
       }
 
@@ -55,11 +68,7 @@ class TravelController extends GetxController {
         textColor: Colors.white,
       );
 
-      Future.delayed(const Duration(milliseconds: 200)).then((value) {
-        existTravelInitialized = true;
-      });
-
-      hideLoading();
+      return null;
     } catch (e) {
       String message = e.toString().substring(11).replaceAll(')', '');
       if (message == 'Viagem não localizada') {
@@ -73,8 +82,8 @@ class TravelController extends GetxController {
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );
-
       hideLoading();
+      throw Exception(e);
     }
   }
 
@@ -109,6 +118,31 @@ class TravelController extends GetxController {
       CustomSnackbar.show(
         Get.context!,
         message: 'Erro ao buscar pedágios da viagem',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    } finally {
+      hideLoading();
+    }
+  }
+
+  Future<void> finishTravel() async {
+    try {
+      if (existTravelInitialized) {
+        travel.status = StatusTravel.finished.name;
+        await _travelService.updateTravel(travel);
+      }
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Viagem finalizada com sucesso',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+      existTravelInitialized = false;
+    } catch (e) {
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Erro ao finalizar viagem',
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );

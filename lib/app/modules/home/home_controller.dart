@@ -39,6 +39,7 @@ class HomeController extends GetxController {
         page: () => const LatLongPage(),
         binding: TravelBinding(),
         transition: Transition.fadeIn,
+        transitionDuration: const Duration(milliseconds: 5),
       );
     }
 

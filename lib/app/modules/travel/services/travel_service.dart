@@ -72,6 +72,8 @@ class TravelService {
             acceptPaymentProximity: toll['aceitaPagamentoAproximacao'],
             datePassage: datePassage,
             travelIdApi: travel['idViagem'],
+            latitude: toll['latLng'] != null ? toll['latLng']['latitude'] as double : null,
+            longitude: toll['latLng'] != null ? toll['latLng']['longitude'] as double : null,
           ));
         }
 
@@ -162,6 +164,16 @@ class TravelService {
   }
 
   Future<void> saveTravel(TravelModel travel) async {
+    /**
+     * filter addresses travelIdApi
+     */
+    var addressesFiltered = travel.addresses?.where((element) => element.travelIdApi == travel.travelIdApi).toList();
+    travel.addresses = addressesFiltered;
+
+    /** filter tolls travelIdApi */
+    var tollsFiltered = travel.tolls?.where((element) => element.travelIdApi == travel.travelIdApi).toList();
+    travel.tolls = tollsFiltered;
+
     await _travelRepositoryDatabase.insertTravel(travel);
   }
 
@@ -178,5 +190,9 @@ class TravelService {
   Future<List<TollModel>?> getTolls({required int travelId}) async {
     var tolls = await _travelRepositoryDatabase.getTolls(travelId: travelId);
     return tolls;
+  }
+
+  Future<void> updateTravel(TravelModel travel) async {
+    await _travelRepositoryDatabase.updateTravel(travel: travel);
   }
 }

@@ -1,4 +1,3 @@
-import 'package:ailog_app_tracking/app/modules/travel/models/travel_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -42,7 +41,7 @@ class TravelData extends StatelessWidget {
             ),
             const Divider(),
             Padding(
-              padding: const EdgeInsets.only(left: 5),
+              padding: const EdgeInsets.only(left: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -86,7 +85,7 @@ class TravelData extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 5),
+              padding: const EdgeInsets.only(left: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -139,7 +138,7 @@ class TravelData extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 5),
+              padding: const EdgeInsets.only(left: 10),
               child: Row(
                 children: [
                   SizedBox(
@@ -169,7 +168,7 @@ class TravelData extends StatelessWidget {
                           child: SizedBox(
                             width: 90,
                             child: Text(
-                              'R\$ ${travel.valueTotal?.toStringAsFixed(2)}',
+                              NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(travel.valueTotal),
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 15, overflow: TextOverflow.ellipsis),
                             ),
@@ -182,7 +181,7 @@ class TravelData extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 5),
+              padding: const EdgeInsets.only(left: 10),
               child: Row(
                 children: [
                   SizedBox(
@@ -206,7 +205,7 @@ class TravelData extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 5),
+              padding: const EdgeInsets.only(left: 10),
               child: Row(
                 children: [
                   SizedBox(
@@ -242,8 +241,7 @@ class TravelData extends StatelessWidget {
                         content: 'Deseja finalizar a viagem?',
                         textButton: 'Finalizar',
                         onPressed: () {
-                          final travelSelected = travel;
-                          travelSelected.status = StatusTravel.finished.name.toLowerCase();
+                          travelController.finishTravel();
                           Get.back();
                         },
                       ),

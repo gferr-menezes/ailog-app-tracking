@@ -1,8 +1,17 @@
-import 'package:ailog_app_tracking/app/modules/travel/controllers/geolocation_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'dart:async';
+import 'dart:developer';
 
+import 'package:ailog_app_tracking/app/common/ui/widgets/error_location_permission.dart';
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import '../../../common/geolocation.dart';
+
+import '../../../common/permission_controller.dart';
 import '../../../common/ui/widgets/custom_loading.dart';
+import '../controllers/geolocation_controller.dart';
 import '../controllers/travel_controller.dart';
 import '../widgets/address_list.dart';
 import '../widgets/form_travel.dart';
@@ -16,91 +25,197 @@ class TravelPage extends StatefulWidget {
   State<TravelPage> createState() => _TravelPageState();
 }
 
-class _TravelPageState extends State<TravelPage> {
+class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
+  //StreamSubscription<Position>? _positionStreamSubscription;
+
+  // late LocationSettings locationSettings = AndroidSettings(
+  //   accuracy: LocationAccuracy.high,
+  //   distanceFilter: 1,
+  //   forceLocationManager: true,
+  //   intervalDuration: const Duration(minutes: 1),
+  //   //(Optional) Set foreground notification config to keep the app alive
+  //   //when going to the background
+  //   foregroundNotificationConfig: const ForegroundNotificationConfig(
+  //     notificationText: "Coletando dados de localização",
+  //     notificationTitle: "Ailog App",
+  //     enableWakeLock: true,
+  //   ),
+  // );
+
   final TravelController travelController = Get.find<TravelController>();
   final GeolocationController geolocationController = Get.find<GeolocationController>();
+  StreamSubscription<Position>? _positionStreamSubscription;
+
+  late Future<PermissionStatus> permissionApp;
+  bool _appPermissionLocation = false;
 
   @override
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addObserver(this);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      PermissionController.checkGeolocationPermission().then((value) {
+        if (value == PermissionStatus.granted) {
+          setState(() {
+            _appPermissionLocation = true;
+          });
+        } else {
+          PermissionController.getGeolocationPermission().then((value) {
+            if (value) {
+              setState(() {
+                _appPermissionLocation = true;
+              });
+            }
+          });
+        }
+      });
+
       travelController.checkTravelInitialized();
     });
 
-    // geolocationController.collectLatitudeLongitude();
-    geolocationController.sendGeolocationsPending();
+    Timer.periodic(const Duration(minutes: 2), (timer) async {
+      var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      print("#################### collectLatitudeLongitude");
+      Position? lastPosition = await Geolocator.getLastKnownPosition();
+      if (lastPosition != null) {
+        print("#################### lastPosition $lastPosition");
+      }
+      geolocationController.collectLatitudeLongitude(position);
+    });
+
+    Timer.periodic(const Duration(minutes: 2), (timer) {
+      geolocationController.sendGeolocationsPending();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // _getPositionEveryTime();
+      _positionStreamSubscription?.cancel();
+    } else if (state == AppLifecycleState.paused) {
+      log('message');
+      // _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+      //   (Position? position) {
+      //     log("###### position stream ${DateTime.now()} $position");
+      //   },
+      // );
+      Geolocation.callPositionStream().then((value) => _positionStreamSubscription = value);
+    }
+  }
+
+  Position? _currentPosition;
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      print('Location services are disabled.');
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print("Location permissions are denied");
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      print("Location permissions are permanently denied, we cannot request permissions.");
+      return false;
+    }
+    return true;
+  }
+
+  validadePermission(bool check) {
+    if (check) {
+      setState(() {
+        _appPermissionLocation = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Obx(
-          () {
-            return travelController.loadingCheckTravelInitialized
-                ? const CustomLoading()
-                : !travelController.existTravelInitialized
-                    ? const Padding(
-                        padding: EdgeInsets.only(left: 5, top: 30, right: 5, bottom: 20),
-                        child: FormTravel(),
-                      )
-                    : Column(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(top: 5, left: 5, right: 5),
-                            child: TravelData(),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 5, top: 5, right: 5, bottom: 5),
-                              child: DefaultTabController(
-                                length: 2,
-                                child: Scaffold(
-                                  appBar: PreferredSize(
-                                      preferredSize: const Size.fromHeight(40),
-                                      child: AppBar(
-                                        backgroundColor: context.theme.primaryColorLight,
-                                        automaticallyImplyLeading: false,
-                                        flexibleSpace: Column(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            TabBar(
-                                              indicatorColor: context.theme.primaryColor,
-                                              labelColor: Colors.black,
-                                              tabs: const [
-                                                SizedBox(
-                                                  height: 30,
-                                                  child: Tab(
-                                                    text: 'ENDEREÇOS',
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: 30,
-                                                  child: Tab(
-                                                    text: 'PEDÁGIOS',
-                                                  ),
-                                                ),
+    return !_appPermissionLocation
+        ? ErrorLocationPermission(callback: validadePermission)
+        : SingleChildScrollView(
+            child: Obx(
+              () {
+                return travelController.loadingCheckTravelInitialized
+                    ? const CustomLoading()
+                    : !travelController.existTravelInitialized
+                        ? const Padding(
+                            padding: EdgeInsets.only(left: 5, top: 30, right: 5, bottom: 20),
+                            child: FormTravel(),
+                          )
+                        : Column(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+                                child: TravelData(),
+                              ),
+                              SizedBox(
+                                height: context.height * 0.5,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 5, top: 5, right: 5, bottom: 5),
+                                  child: DefaultTabController(
+                                    length: 2,
+                                    child: Scaffold(
+                                      appBar: PreferredSize(
+                                          preferredSize: const Size.fromHeight(40),
+                                          child: AppBar(
+                                            backgroundColor: context.theme.primaryColorLight,
+                                            automaticallyImplyLeading: false,
+                                            flexibleSpace: Column(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                TabBar(
+                                                  indicatorColor: context.theme.primaryColor,
+                                                  labelColor: Colors.black,
+                                                  tabs: const [
+                                                    SizedBox(
+                                                      height: 30,
+                                                      child: Tab(
+                                                        text: 'ENDEREÇOS',
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 30,
+                                                      child: Tab(
+                                                        text: 'PEDÁGIOS',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
                                               ],
-                                            )
-                                          ],
-                                        ),
-                                      )),
-                                  body: const TabBarView(
-                                    children: [
-                                      AddressList(),
-                                      TollList(),
-                                    ],
+                                            ),
+                                          )),
+                                      body: const TabBarView(
+                                        children: [
+                                          AddressList(),
+                                          TollList(),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      );
-          },
-        );
-      },
-    );
+                            ],
+                          );
+              },
+            ),
+          );
   }
 }

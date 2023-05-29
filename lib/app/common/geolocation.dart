@@ -36,12 +36,14 @@ class Geolocation {
       }
     }
 
+    print('Location permissions are granted (actual value: $permission).');
+
     return true;
   }
 
   static Future<Position?> getCurrentPosition() async {
     try {
-      Geolocation._handleLocationPermission();
+      await Geolocation._handleLocationPermission();
 
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -56,11 +58,12 @@ class Geolocation {
 
   static Future<StreamSubscription<Position>?> callPositionStream() async {
     try {
+      print("####### POSITION STREAM INITIATED");
       final LocationSettings locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 100,
+        distanceFilter: 1,
         forceLocationManager: true,
-        intervalDuration: const Duration(seconds: 10),
+        intervalDuration: const Duration(seconds: 1),
         foregroundNotificationConfig: const ForegroundNotificationConfig(
           notificationIcon: AndroidResource(name: 'ic_stat_onesignal_default'),
           notificationText: "Coletando dados de localização",
@@ -70,14 +73,25 @@ class Geolocation {
       );
 
       var position = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-        (Position? position) {},
+        (Position? position) {
+          log("###### position stream ${DateTime.now()} $position");
+        },
       );
+
       return position;
     } catch (e) {
       log("Error: $e");
     }
 
     return null;
+  }
+
+  static getLastKnownPosition() async {
+    Position? lastPosition = await Geolocator.getLastKnownPosition();
+    print("#################### lastPosition $lastPosition");
+    if (lastPosition != null) {
+      return lastPosition;
+    }
   }
 
   static Future<List<Placemark>> getCity({required double latitude, required double longitude}) async {
