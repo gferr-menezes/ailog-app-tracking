@@ -1,7 +1,3 @@
-import 'dart:developer';
-
-//import 'package:ailog_app_tracking/app/common/geolocation.dart';
-import 'package:ailog_app_tracking/app/modules/travel/controllers/geolocation_controller.dart';
 import 'package:ailog_app_tracking/app/modules/travel/widgets/select_travel.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,7 +15,6 @@ class FormTravel extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final plateEC = TextEditingController();
     final TravelController travelController = Get.find<TravelController>();
-    final GeolocationController geolocationController = Get.find<GeolocationController>();
 
     //plateEC.text = 'DOO-8946';
     plateEC.text = 'XYZ2044';

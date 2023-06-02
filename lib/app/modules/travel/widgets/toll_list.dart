@@ -1,9 +1,16 @@
-import 'dart:developer';
-
+import 'package:ailog_app_tracking/app/common/ui/widgets/custom_button.dart';
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_loading.dart';
+import 'package:ailog_app_tracking/app/common/ui/widgets/custom_text_form_field.dart';
+import 'package:ailog_app_tracking/app/common/ui/widgets/documents_page.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
+import 'package:camera/camera.dart';
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:validatorless/validatorless.dart';
 
 import '../controllers/travel_controller.dart';
 
@@ -16,6 +23,15 @@ class TollList extends StatelessWidget {
     final travel = travelController.travel;
     travelController.getTolls(travelId: travel.id!);
     final tolls = travelController.tolls;
+
+    /**
+     * create mask money
+     */
+    final moneyMask = CurrencyTextInputFormatter(
+      locale: 'pt_BR',
+      decimalDigits: 2,
+      symbol: 'R\$',
+    );
 
     return Obx(
       () => travelController.loadingGetTolls
@@ -44,7 +60,10 @@ class TollList extends StatelessWidget {
                                 itemBuilder: (context) {
                                   return [
                                     PopupMenuItem(
-                                      value: 'show_map',
+                                      value: {
+                                        'action': 'show_map',
+                                        'toll': toll,
+                                      },
                                       child: Row(
                                         children: const [
                                           Icon(
@@ -57,10 +76,47 @@ class TollList extends StatelessWidget {
                                         ],
                                       ),
                                     ),
+                                    PopupMenuItem(
+                                      value: {
+                                        'action': 'change_value',
+                                        'toll': toll,
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Icon(
+                                            Icons.money,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text('Informar valor manualmente'),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuItem(
+                                      value: {
+                                        'action': 'send_photo',
+                                        'toll': toll,
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Icon(
+                                            Icons.camera_alt_rounded,
+                                          ),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text('Enviar foto do comprovante'),
+                                        ],
+                                      ),
+                                    ),
                                   ];
                                 },
-                                onSelected: (String value) {
-                                  if (value == 'show_map') {
+                                onSelected: (value) async {
+                                  final action = value['action'] as String;
+                                  final toll = value['toll'] as TollModel;
+
+                                  if (action == 'show_map') {
                                     if (toll.latitude != null && toll.longitude != null) {
                                       Get.toNamed(
                                         '/travel/map',
@@ -72,38 +128,173 @@ class TollList extends StatelessWidget {
                                       );
                                     }
                                   }
+
+                                  if (action == 'change_value') {
+                                    TextEditingController valueTC = TextEditingController();
+                                    final formKey = GlobalKey<FormState>();
+
+                                    showDialog(
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          backgroundColor: Colors.transparent,
+                                          insetPadding: const EdgeInsets.all(10),
+                                          child: Container(
+                                            width: double.infinity,
+                                            color: Colors.white,
+                                            height: 210,
+                                            padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+                                            child: Form(
+                                              key: formKey,
+                                              child: Column(
+                                                children: [
+                                                  CustomTextFormField(
+                                                    validator: Validatorless.required('Informe o valor'),
+                                                    keyboardType: TextInputType.number,
+                                                    label: 'Informe o valor',
+                                                    controller: valueTC,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.digitsOnly,
+                                                      moneyMask,
+                                                    ],
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 15,
+                                                  ),
+                                                  Obx(
+                                                    () {
+                                                      return Column(
+                                                        children: [
+                                                          CustomButtom(
+                                                            label: 'Salvar',
+                                                            loading: travelController.loadingInformValuePay,
+                                                            onPressed: travelController.loadingInformValuePay == true
+                                                                ? null
+                                                                : () {
+                                                                    if (formKey.currentState!.validate()) {
+                                                                      FocusManager.instance.primaryFocus?.unfocus();
+                                                                      travelController
+                                                                          .informValuePay(toll, valueTC.text)
+                                                                          .then((value) {
+                                                                        /** close dialog with flutter */
+                                                                        Future.delayed(
+                                                                            const Duration(milliseconds: 800), () {
+                                                                          Navigator.of(context).pop();
+                                                                        });
+                                                                      });
+                                                                    }
+                                                                  },
+                                                            width: context.width,
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          CustomButtom(
+                                                            width: context.width,
+                                                            label: 'Cancelar',
+                                                            color: Colors.grey,
+                                                            onPressed: travelController.loadingInformValuePay
+                                                                ? null
+                                                                : () {
+                                                                    Navigator.of(context).pop();
+                                                                  },
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }
+
+                                  if (action == 'send_photo') {
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) => const DocumentsPage(),
+                                    //     fullscreenDialog: true,
+                                    //   ),
+                                    // );
+                                    Get.toNamed('/documents');
+                                  }
                                 },
                               ),
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              title: Column(
                                 children: [
-                                  Expanded(
-                                    flex: 1,
-                                    child: Row(
-                                      children: [
-                                        const Text('Data passagem: '),
-                                        Text(toll.datePassage != null
-                                            ? DateFormat('dd/MM/yyyy HH:mm').format(toll.datePassage as DateTime)
-                                            : ' - '),
-                                      ],
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: Row(
+                                          children: [
+                                            const Text('Data passagem: '),
+                                            Text(toll.datePassage != null
+                                                ? DateFormat('dd/MM/yyyy HH:mm').format(toll.datePassage as DateTime)
+                                                : ' - '),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: Row(
+                                          children: [
+                                            const Text('Valor: '),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 5,
+                                              ),
+                                              child: Text(
+                                                NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$')
+                                                    .format(toll.valueTag),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Row(
-                                      children: [
-                                        const Text('Valor TAG: '),
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 5,
-                                          ),
-                                          child: Text(
-                                            NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(toll.valueTag),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  )
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: Row(
+                                          children: const [
+                                            SizedBox.shrink(),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 1,
+                                        child: Row(
+                                          children: [
+                                            const Text('Informado: '),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                left: 5,
+                                              ),
+                                              child: Text(
+                                                toll.valueInformed == null
+                                                    ? ' - '
+                                                    : NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$')
+                                                        .format(toll.valueInformed),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ],
                               ),
                               dense: true,

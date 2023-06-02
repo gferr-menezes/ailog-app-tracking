@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +17,7 @@ class TravelController extends GetxController {
   final _loadingStartingTravel = false.obs;
   final _loadingGetAddresses = false.obs;
   final _loadingGetTolls = false.obs;
+  final _loadingInformValuePay = false.obs;
 
   final _travel = TravelModel().obs;
   final _addresses = <AddressModel>[].obs;
@@ -151,12 +150,45 @@ class TravelController extends GetxController {
     }
   }
 
+  Future<void> informValuePay(TollModel toll, String value) async {
+    double valuePay = double.parse(value.replaceAll('R\$', '').replaceAll(',', '.'));
+
+    try {
+      loadingInformValuePay = true;
+      await _travelService.informValuePay(
+        toll: toll,
+        valuePay: valuePay,
+      );
+
+      await getTolls(travelId: toll.travelId!);
+
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Operação realizada com sucesso',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Erro ao informar valor pago',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+
+      throw Exception(e);
+    } finally {
+      hideLoading();
+    }
+  }
+
   void hideLoading() {
     Future.delayed(const Duration(milliseconds: 200)).then((value) {
       loadingStartingTravel = false;
       loadingCheckTravelInitialized = false;
       loadingGetAddresses = false;
       loadingGetTolls = false;
+      loadingInformValuePay = false;
     });
   }
 
@@ -184,6 +216,11 @@ class TravelController extends GetxController {
   bool get loadingGetTolls => _loadingGetTolls.value;
   set loadingGetTolls(bool value) {
     _loadingGetTolls.value = value;
+  }
+
+  bool get loadingInformValuePay => _loadingInformValuePay.value;
+  set loadingInformValuePay(bool value) {
+    _loadingInformValuePay.value = value;
   }
 
   TravelModel get travel => _travel.value;

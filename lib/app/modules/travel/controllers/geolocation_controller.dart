@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:ailog_app_tracking/app/common/geolocation.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/geolocation_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/travel_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/services/geolocation_service.dart';

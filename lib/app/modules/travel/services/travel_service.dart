@@ -70,6 +70,7 @@ class TravelService {
             valueTag: toll['valorTag'] as double,
             acceptAutomaticBilling: toll['aceitaCobrancaAutomatica'],
             acceptPaymentProximity: toll['aceitaPagamentoAproximacao'],
+            valueInformed: toll['valorInformadoMotorista'] != null ? toll['valorInformadoMotorista'] as double : null,
             datePassage: datePassage,
             travelIdApi: travel['idViagem'],
             latitude: toll['latLng'] != null ? toll['latLng']['latitude'] as double : null,
@@ -194,5 +195,25 @@ class TravelService {
 
   Future<void> updateTravel(TravelModel travel) async {
     await _travelRepositoryDatabase.updateTravel(travel: travel);
+  }
+
+  Future<void> informValuePay({
+    required TollModel toll,
+    required double valuePay,
+  }) async {
+    try {
+      await _travelRepository.informValuePay(
+        travelApiId: toll.travelIdApi!,
+        passOrder: toll.passOrder,
+        ailogId: toll.ailogId,
+        valuePay: valuePay,
+      );
+
+      toll.valueInformed = valuePay;
+
+      await _travelRepositoryDatabase.updateToll(toll: toll);
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 }

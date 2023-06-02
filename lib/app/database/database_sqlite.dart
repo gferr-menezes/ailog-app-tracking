@@ -10,7 +10,7 @@ class DatabaseSQLite {
 
     return await openDatabase(
       databaseFinalPath,
-      version: 5,
+      version: 6,
       onCreate: (Database db, int version) async {
         log('Criando banco de dados versão $version');
 
@@ -57,6 +57,7 @@ class DatabaseSQLite {
               date_passage DATE_TIME,
               value_tag FLOAT NOT NULL,
               value_manual FLOAT NOT NULL,
+              value_informed FLOAT,
               accept_automatic_billing BOOLEAN DEFAULT 0,
               accept_payment_proximity BOOLEAN DEFAULT 0,
               latitude double,
@@ -215,6 +216,16 @@ class DatabaseSQLite {
           if (checkColumnExists.isEmpty) {
             batch.execute('''
               ALTER TABLE tolls ADD COLUMN longitude double;
+            ''');
+          }
+
+          checkColumnExists = await db.rawQuery('''
+            SELECT * FROM pragma_table_info('tolls') WHERE name = 'value_informed';
+          ''');
+
+          if (checkColumnExists.isEmpty) {
+            batch.execute('''
+              ALTER TABLE tolls ADD COLUMN value_informed FLOAT;
             ''');
           }
 

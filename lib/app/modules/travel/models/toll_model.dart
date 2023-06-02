@@ -15,6 +15,7 @@ class TollModel {
   bool? acceptPaymentProximity;
   double? latitude;
   double? longitude;
+  double? valueInformed;
 
   TollModel({
     this.id,
@@ -33,6 +34,7 @@ class TollModel {
     this.acceptPaymentProximity,
     this.latitude,
     this.longitude,
+    this.valueInformed,
   });
 
   TollModel.fromJson(Map<String, dynamic> json)
@@ -51,7 +53,8 @@ class TollModel {
         acceptAutomaticBilling = json['accept_automatic_billing'] == 1 ? true : false,
         acceptPaymentProximity = json['accept_payment_proximity'] == 1 ? true : false,
         latitude = json['latitude'],
-        longitude = json['longitude'];
+        longitude = json['longitude'],
+        valueInformed = json['value_informed'];
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
@@ -70,11 +73,12 @@ class TollModel {
     data['accept_payment_proximity'] = acceptPaymentProximity;
     data['latitude'] = latitude;
     data['longitude'] = longitude;
+    data['value_informed'] = valueInformed;
     return data;
   }
 
   @override
   String toString() {
-    return 'TollModel{id: $id, travelId: $travelId, travelIdApi: $travelIdApi, tollName: $tollName, passOrder: $passOrder, quantityAxes: $quantityAxes, ailogId: $ailogId, concessionaire: $concessionaire, highway: $highway, datePassage: $datePassage, valueTag: $valueTag, valueManual: $valueManual, acceptAutomaticBilling: $acceptAutomaticBilling, acceptPaymentProximity: $acceptPaymentProximity, latitude: $latitude, longitude: $longitude}';
+    return 'TollModel{id: $id, travelId: $travelId, travelIdApi: $travelIdApi, tollName: $tollName, passOrder: $passOrder, quantityAxes: $quantityAxes, ailogId: $ailogId, concessionaire: $concessionaire, highway: $highway, datePassage: $datePassage, valueTag: $valueTag, valueManual: $valueManual, acceptAutomaticBilling: $acceptAutomaticBilling, acceptPaymentProximity: $acceptPaymentProximity, latitude: $latitude, longitude: $longitude, valueInformed: $valueInformed}';
   }
 }

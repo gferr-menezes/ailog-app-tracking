@@ -82,6 +82,7 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
             'accept_payment_proximity': toll.acceptPaymentProximity,
             'latitude': toll.latitude,
             'longitude': toll.longitude,
+            'value_informed': toll.valueInformed,
           });
         }
       }
@@ -231,20 +232,6 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
           'date_send_api': geolocation.dateSendApi?.toIso8601String(),
         });
       }
-
-      // await db.transaction<void>((txn) async {
-      //   for (final geolocation in geolocations) {
-      //     await txn.insert('geolocations', {
-      //       'latitude': geolocation.latitude,
-      //       'longitude': geolocation.longitude,
-      //       'collection_date': geolocation.collectionDate.toIso8601String(),
-      //       'travel_id': geolocation.travelId,
-      //       'status_send_api': geolocation.statusSendApi,
-      //       'date_send_api': geolocation.dateSendApi?.toIso8601String(),
-      //     });
-      //   }
-      // });
-
       print('insertGeolocations success');
     } catch (e) {
       print('insertGeolocations error');
@@ -301,6 +288,20 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
       },
       where: 'id = ?',
       whereArgs: [travel.id],
+    );
+  }
+
+  @override
+  Future<void> updateToll({required TollModel toll}) async {
+    final db = await DatabaseSQLite().openConnection();
+
+    await db.update(
+      'tolls',
+      {
+        'value_informed': toll.valueInformed,
+      },
+      where: 'id = ?',
+      whereArgs: [toll.id],
     );
   }
 }

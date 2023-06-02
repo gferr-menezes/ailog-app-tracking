@@ -1,3 +1,4 @@
+import 'package:ailog_app_tracking/app/common/ui/widgets/documents_page.dart';
 import 'package:get/get.dart';
 
 import '../modules/home/home_bindings.dart';
@@ -18,6 +19,12 @@ class HomeRoutes {
       name: '/travel/map',
       page: () => const MapPage(),
       binding: TravelBinding(),
+      transitionDuration: const Duration(milliseconds: 5),
+      arguments: null,
+    ),
+    GetPage(
+      name: '/documents',
+      page: () => const DocumentsPage(),
       transitionDuration: const Duration(milliseconds: 5),
       arguments: null,
     ),

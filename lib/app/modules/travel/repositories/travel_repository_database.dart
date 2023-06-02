@@ -12,4 +12,5 @@ abstract class TravelRepositoryDatabase {
   Future<List<GeolocationModel>?> getGeolocations({int? travelId, String? statusSendApi});
   Future<void> updateGeolocations({required List<GeolocationModel> geolocations});
   Future<void> updateTravel({required TravelModel travel});
+  Future<void> updateToll({required TollModel toll});
 }

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ailog_app_tracking/app/common/permission_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

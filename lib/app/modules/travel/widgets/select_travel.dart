@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:ailog_app_tracking/app/common/geolocation.dart';
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_button.dart';
 import 'package:flutter/material.dart';

@@ -1,5 +1,4 @@
 import '../database/database_sqlite.dart';
-import 'geolocation.dart';
 
 class LoadDependencies {
   LoadDependencies._();

@@ -69,4 +69,32 @@ class TravelRepositoryImpl implements TravelRepository {
       throw Exception(e);
     }
   }
+
+  @override
+  Future<void> informValuePay({
+    required String travelApiId,
+    required int passOrder,
+    required int ailogId,
+    required double valuePay,
+  }) async {
+    try {
+      var dataSend = jsonEncode({
+        'idViagem': travelApiId,
+        'ordemPassagem': passOrder,
+        'idPedagio': ailogId,
+        'valorPago': valuePay,
+      });
+
+      final Response response = await _restClient.post('/viagem/pedagio/informarValorPago', dataSend);
+
+      print("#################response.body: ${response.body}");
+
+      var result = response.body;
+      if (result == null || result['status'] != 'SUCESSO') {
+        throw Exception(result == null ? 'error_communication_backend' : result['status']);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
 }

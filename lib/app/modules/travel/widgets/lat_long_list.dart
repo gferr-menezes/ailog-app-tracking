@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
-
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_loading.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/geolocation_model.dart';
 import 'package:flutter/material.dart';
