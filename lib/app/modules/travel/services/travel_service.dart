@@ -75,6 +75,7 @@ class TravelService {
             travelIdApi: travel['idViagem'],
             latitude: toll['latLng'] != null ? toll['latLng']['latitude'] as double : null,
             longitude: toll['latLng'] != null ? toll['latLng']['longitude'] as double : null,
+            urlVoucherImage: toll['urlComprovante'],
           ));
         }
 

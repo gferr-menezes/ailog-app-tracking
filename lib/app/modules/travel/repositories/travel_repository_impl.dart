@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -16,7 +15,7 @@ class TravelRepositoryImpl implements TravelRepository {
 
   @override
   Future<Map<String, dynamic>>? checkTravelExistsInAPI(String plate) async {
-    final response = await _restClient.post('/viagem/find', {
+    final response = await _restClient.post('/tracking/viagem/find', {
       'placa': plate,
     });
 
@@ -55,7 +54,7 @@ class TravelRepositoryImpl implements TravelRepository {
         });
       }
 
-      final Response response = await _restClient.post('/enviarPontos', dataSend);
+      final Response response = await _restClient.post('/tracking/enviarPontos', dataSend);
 
       print("#################response.body: ${response.body}");
 
@@ -85,7 +84,7 @@ class TravelRepositoryImpl implements TravelRepository {
         'valorPago': valuePay,
       });
 
-      final Response response = await _restClient.post('/viagem/pedagio/informarValorPago', dataSend);
+      final Response response = await _restClient.post('/tracking/viagem/pedagio/informarValorPago', dataSend);
 
       print("#################response.body: ${response.body}");
 

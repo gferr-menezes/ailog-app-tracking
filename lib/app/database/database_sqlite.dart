@@ -10,7 +10,7 @@ class DatabaseSQLite {
 
     return await openDatabase(
       databaseFinalPath,
-      version: 6,
+      version: 7,
       onCreate: (Database db, int version) async {
         log('Criando banco de dados versão $version');
 
@@ -61,7 +61,8 @@ class DatabaseSQLite {
               accept_automatic_billing BOOLEAN DEFAULT 0,
               accept_payment_proximity BOOLEAN DEFAULT 0,
               latitude double,
-              longitude double
+              longitude double,
+              url_voucher_image VARCHAR(255),
             )
           ''');
 
@@ -226,6 +227,16 @@ class DatabaseSQLite {
           if (checkColumnExists.isEmpty) {
             batch.execute('''
               ALTER TABLE tolls ADD COLUMN value_informed FLOAT;
+            ''');
+          }
+
+          checkColumnExists = await db.rawQuery('''
+            SELECT * FROM pragma_table_info('tolls') WHERE name = 'url_voucher_image';
+          ''');
+
+          if (checkColumnExists.isEmpty) {
+            batch.execute('''
+              ALTER TABLE tolls ADD COLUMN url_voucher_image VARCHAR(255);
             ''');
           }
 

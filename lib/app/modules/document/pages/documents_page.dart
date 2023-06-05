@@ -2,8 +2,14 @@ import 'dart:io';
 
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_button.dart';
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_loading.dart';
+import 'package:ailog_app_tracking/app/modules/document/services/document_service.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+
+import '../../../common/ui/widgets/custom_snackbar.dart';
 
 class DocumentsPage extends StatefulWidget {
   const DocumentsPage({Key? key}) : super(key: key);
@@ -13,14 +19,20 @@ class DocumentsPage extends StatefulWidget {
 }
 
 class _DocumentsPageState extends State<DocumentsPage> {
+  Map<String, dynamic>? arguments;
+  final DocumentService documentService = Get.find();
   List<CameraDescription> cameras = [];
   CameraController? controller;
   XFile? imagem;
   Size? size;
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
+
+    arguments = Get.arguments as Map<String, dynamic>?;
+
     _loadCameras();
   }
 
@@ -73,24 +85,15 @@ class _DocumentsPageState extends State<DocumentsPage> {
     size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Container(
-        color: Colors.white,
-        child: Center(
-          child: _fileWidget(),
-        ),
-      ),
-      // floatingActionButton: (imagem != null)
-      //     ? FloatingActionButton.extended(
-      //         onPressed: () => Navigator.pop(context),
-      //         label: const Text("Enviar comprovante"),
-      //       )
-      //     : null,
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      body: _fileWidget(),
     );
   }
 
   _fileWidget() {
-    return SizedBox(
+    return Container(
+      width: size!.width,
+      height: size!.height,
+      color: Colors.black.withOpacity(0.7),
       child: imagem == null
           ? _cameraPreviewWidget()
           : Stack(
@@ -105,9 +108,48 @@ class _DocumentsPageState extends State<DocumentsPage> {
                   child: Column(
                     children: [
                       CustomButtom(
+                        loading: loading,
                         width: size!.width * 0.94,
                         label: "Enviar comprovante",
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: loading
+                            ? null
+                            : () async {
+                                try {
+                                  setState(() {
+                                    loading = true;
+                                  });
+
+                                  File file = File(imagem!.path);
+
+                                  Uint8List bytes = file.readAsBytesSync();
+
+                                  TollModel toll = arguments!['toll'];
+                                  final imageUrl = await documentService.upload(toll: toll, image: bytes);
+                                  setState(() {
+                                    loading = false;
+                                  });
+
+                                  CustomSnackbar.show(
+                                    Get.context!,
+                                    message: 'Arquivo enviado com sucesso!',
+                                    backgroundColor: Colors.green,
+                                    textColor: Colors.white,
+                                  );
+
+                                  Navigator.pop(Get.context!, imageUrl);
+                                } catch (e) {
+                                  CustomSnackbar.show(
+                                    Get.context!,
+                                    message: 'Erro ao enviar arquivo!',
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                  );
+
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                }
+                              },
                       ),
                       const SizedBox(
                         height: 10,
@@ -116,7 +158,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                         width: size!.width * 0.94,
                         color: Colors.grey[400],
                         label: "Cancelar",
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => loading ? null : Navigator.pop(context),
                       )
                     ],
                   ),
@@ -135,7 +177,6 @@ class _DocumentsPageState extends State<DocumentsPage> {
       );
     } else {
       return Stack(
-        alignment: AlignmentDirectional.bottomCenter,
         children: [
           CameraPreview(controller!),
           _captureWidget(),
@@ -145,32 +186,31 @@ class _DocumentsPageState extends State<DocumentsPage> {
   }
 
   _captureWidget() {
-    return SizedBox(
-      height: size!.height,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.black.withOpacity(0.5),
-              child: IconButton(
-                onPressed: _takePicture,
-                icon: const Icon(Icons.camera_alt, color: Colors.white),
-              ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: Colors.black.withOpacity(0.5),
+            child: IconButton(
+              onPressed: _takePicture,
+              icon: const Icon(Icons.camera_alt, color: Colors.white),
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            CustomButtom(
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Center(
+            child: CustomButtom(
               width: size!.width * 0.95,
               color: Colors.grey[400],
               label: "Cancelar",
               onPressed: () => Navigator.pop(context),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -180,12 +220,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
     if (cameraController != null && cameraController.value.isInitialized) {
       try {
         cameraController.setFlashMode(FlashMode.off);
-
         XFile file = await cameraController.takePicture();
-
-        var bytes = await file.readAsBytes();
-
-        print(bytes);
 
         if (mounted) {
           setState(() {

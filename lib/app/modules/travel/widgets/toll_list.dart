@@ -1,9 +1,7 @@
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_button.dart';
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_loading.dart';
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_text_form_field.dart';
-import 'package:ailog_app_tracking/app/common/ui/widgets/documents_page.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
-import 'package:camera/camera.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 
 import 'package:flutter/material.dart';
@@ -110,6 +108,24 @@ class TollList extends StatelessWidget {
                                         ],
                                       ),
                                     ),
+                                    if (toll.urlVoucherImage != null)
+                                      PopupMenuItem(
+                                        value: {
+                                          'action': 'show_ticket',
+                                          'toll': toll,
+                                        },
+                                        child: Row(
+                                          children: const [
+                                            Icon(
+                                              Icons.receipt_long,
+                                            ),
+                                            SizedBox(
+                                              width: 5,
+                                            ),
+                                            Text('Exibir comprovante'),
+                                          ],
+                                        ),
+                                      ),
                                   ];
                                 },
                                 onSelected: (value) async {
@@ -214,14 +230,47 @@ class TollList extends StatelessWidget {
                                   }
 
                                   if (action == 'send_photo') {
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //     builder: (context) => const DocumentsPage(),
-                                    //     fullscreenDialog: true,
-                                    //   ),
-                                    // );
-                                    Get.toNamed('/documents');
+                                    /** esperar usuario fechar e exceutar funcão */
+                                    Get.toNamed(
+                                      '/documents',
+                                      arguments: {
+                                        'toll': toll,
+                                      },
+                                    )!
+                                        .then((value) {
+                                      if (value != null) {
+                                        travelController.getTolls(travelId: travel.id!);
+                                      }
+                                    });
+                                  }
+
+                                  if (action == 'show_ticket') {
+                                    showDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          backgroundColor: Colors.transparent,
+                                          insetPadding: const EdgeInsets.all(10),
+                                          child: Container(
+                                            width: double.infinity,
+                                            color: Colors.white,
+                                            height: context.height * 0.8,
+                                            padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+                                            child: Image.network(
+                                              toll.urlVoucherImage!,
+                                              fit: BoxFit.contain,
+                                              loadingBuilder: (context, child, loadingProgress) {
+                                                if (loadingProgress == null) return child;
+                                                return const Center(
+                                                  child: CustomLoading(),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
                                   }
                                 },
                               ),

@@ -16,6 +16,7 @@ class TollModel {
   double? latitude;
   double? longitude;
   double? valueInformed;
+  String? urlVoucherImage;
 
   TollModel({
     this.id,
@@ -35,6 +36,7 @@ class TollModel {
     this.latitude,
     this.longitude,
     this.valueInformed,
+    this.urlVoucherImage,
   });
 
   TollModel.fromJson(Map<String, dynamic> json)
@@ -54,7 +56,8 @@ class TollModel {
         acceptPaymentProximity = json['accept_payment_proximity'] == 1 ? true : false,
         latitude = json['latitude'],
         longitude = json['longitude'],
-        valueInformed = json['value_informed'];
+        valueInformed = json['value_informed'],
+        urlVoucherImage = json['url_voucher_image'];
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
@@ -74,11 +77,12 @@ class TollModel {
     data['latitude'] = latitude;
     data['longitude'] = longitude;
     data['value_informed'] = valueInformed;
+    data['url_voucher_image'] = urlVoucherImage;
     return data;
   }
 
   @override
   String toString() {
-    return 'TollModel{id: $id, travelId: $travelId, travelIdApi: $travelIdApi, tollName: $tollName, passOrder: $passOrder, quantityAxes: $quantityAxes, ailogId: $ailogId, concessionaire: $concessionaire, highway: $highway, datePassage: $datePassage, valueTag: $valueTag, valueManual: $valueManual, acceptAutomaticBilling: $acceptAutomaticBilling, acceptPaymentProximity: $acceptPaymentProximity, latitude: $latitude, longitude: $longitude, valueInformed: $valueInformed}';
+    return 'TollModel{id: $id, travelId: $travelId, travelIdApi: $travelIdApi, tollName: $tollName, passOrder: $passOrder, quantityAxes: $quantityAxes, ailogId: $ailogId, concessionaire: $concessionaire, highway: $highway, datePassage: $datePassage, valueTag: $valueTag, valueManual: $valueManual, acceptAutomaticBilling: $acceptAutomaticBilling, acceptPaymentProximity: $acceptPaymentProximity, latitude: $latitude, longitude: $longitude, valueInformed: $valueInformed, urlVoucherImage: $urlVoucherImage}';
   }
 }

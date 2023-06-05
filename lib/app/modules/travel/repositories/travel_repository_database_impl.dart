@@ -83,6 +83,7 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
             'latitude': toll.latitude,
             'longitude': toll.longitude,
             'value_informed': toll.valueInformed,
+            'url_voucher_image': toll.urlVoucherImage,
           });
         }
       }
@@ -299,6 +300,7 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
       'tolls',
       {
         'value_informed': toll.valueInformed,
+        'url_voucher_image': toll.urlVoucherImage,
       },
       where: 'id = ?',
       whereArgs: [toll.id],
