@@ -22,6 +22,8 @@ class TravelController extends GetxController {
   final _travel = TravelModel().obs;
   final _addresses = <AddressModel>[].obs;
   final _tolls = <TollModel>[].obs;
+  final popMenuTollIsVisible = false.obs;
+  BuildContext? contextPopMenu = Get.context;
 
   Future<void> checkTravelInitialized() async {
     try {
@@ -180,6 +182,11 @@ class TravelController extends GetxController {
     } finally {
       hideLoading();
     }
+  }
+
+  void closeTollListPopMenu() {
+    popMenuTollIsVisible.value = false;
+    Navigator.of(contextPopMenu!).pop();
   }
 
   void hideLoading() {

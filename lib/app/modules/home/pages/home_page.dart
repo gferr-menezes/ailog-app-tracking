@@ -14,52 +14,58 @@ class HomePage extends GetView<HomeController> {
     final TravelController travelController = Get.find<TravelController>();
 
     return WillPopScope(
-        onWillPop: () {
+      onWillPop: () async {
+        if (travelController.popMenuTollIsVisible.isTrue) {
+          travelController.closeTollListPopMenu();
+          return false;
+        } else {
           FlutterAppMinimizer.minimize();
           return Future.value(false);
-        },
-        child: Scaffold(
-          appBar: CustomAppBar(),
-          bottomNavigationBar: Obx(
-            () {
-              var travelIsInitialized = travelController.existTravelInitialized;
+        }
+      },
+      child: Scaffold(
+        appBar: CustomAppBar(),
+        bottomNavigationBar: Obx(
+          () {
+            var travelIsInitialized = travelController.existTravelInitialized;
 
-              return BottomNavigationBar(
-                selectedItemColor: context.theme.primaryColor,
-                backgroundColor: Colors.grey[200],
-                currentIndex: controller.tabIndex,
-                onTap: (value) {
-                  if (!travelIsInitialized && value == 1) {
-                    return;
-                  }
-                  controller.tabIndex = value;
-                },
-                items: [
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.home),
-                    label: 'Viagens',
-                    activeIcon: Icon(
-                      Icons.home,
-                      color: context.theme.primaryColor,
-                    ),
+            return BottomNavigationBar(
+              selectedItemColor: context.theme.primaryColor,
+              backgroundColor: Colors.grey[200],
+              currentIndex: controller.tabIndex,
+              onTap: (value) {
+                if (!travelIsInitialized && value == 1) {
+                  return;
+                }
+                controller.tabIndex = value;
+              },
+              items: [
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.home),
+                  label: 'Viagens',
+                  activeIcon: Icon(
+                    Icons.home,
+                    color: context.theme.primaryColor,
                   ),
-                  BottomNavigationBarItem(
-                    icon: const Icon(Icons.map),
-                    activeIcon: Icon(
-                      Icons.map,
-                      color: context.theme.primaryColor,
-                    ),
-                    label: 'Pontos coletados',
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.map),
+                  activeIcon: Icon(
+                    Icons.map,
+                    color: context.theme.primaryColor,
                   ),
-                ],
-              );
-            },
-          ),
-          body: Navigator(
-            initialRoute: '/travel',
-            key: Get.nestedKey(HomeController.NAVIGATOR_KEY),
-            onGenerateRoute: controller.onGenerateRouter,
-          ),
-        ));
+                  label: 'Pontos coletados',
+                ),
+              ],
+            );
+          },
+        ),
+        body: Navigator(
+          initialRoute: '/travel',
+          key: Get.nestedKey(HomeController.NAVIGATOR_KEY),
+          onGenerateRoute: controller.onGenerateRouter,
+        ),
+      ),
+    );
   }
 }

@@ -12,12 +12,24 @@ import 'package:validatorless/validatorless.dart';
 
 import '../controllers/travel_controller.dart';
 
-class TollList extends StatelessWidget {
+class TollList extends StatefulWidget {
   const TollList({Key? key}) : super(key: key);
 
   @override
+  State<TollList> createState() => _TollListState();
+}
+
+class _TollListState extends State<TollList> {
+  final travelController = Get.find<TravelController>();
+
+  @override
+  void dispose() {
+    super.dispose();
+    travelController.popMenuTollIsVisible.value = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final travelController = Get.find<TravelController>();
     final travel = travelController.travel;
     travelController.getTolls(travelId: travel.id!);
     final tolls = travelController.tolls;
@@ -31,6 +43,8 @@ class TollList extends StatelessWidget {
       symbol: 'R\$',
     );
 
+    //BuildContext? _contextPopMenu;
+
     return Obx(
       () => travelController.loadingGetTolls
           ? const CustomLoading()
@@ -40,7 +54,6 @@ class TollList extends StatelessWidget {
                   itemCount: tolls.length,
                   itemBuilder: (context, index) {
                     final toll = tolls[index];
-
                     return Card(
                       elevation: 2,
                       child: SizedBox(
@@ -55,7 +68,16 @@ class TollList extends StatelessWidget {
                             const Divider(),
                             ListTile(
                               trailing: PopupMenuButton(
+                                icon: const Icon(Icons.more_vert),
+                                onOpened: () {
+                                  travelController.popMenuTollIsVisible.value = true;
+                                },
+                                onCanceled: () {
+                                  travelController.popMenuTollIsVisible.value = false;
+                                },
                                 itemBuilder: (context) {
+                                  travelController.contextPopMenu = context;
+
                                   return [
                                     PopupMenuItem(
                                       value: {
@@ -131,7 +153,6 @@ class TollList extends StatelessWidget {
                                 onSelected: (value) async {
                                   final action = value['action'] as String;
                                   final toll = value['toll'] as TollModel;
-
                                   if (action == 'show_map') {
                                     if (toll.latitude != null && toll.longitude != null) {
                                       Get.toNamed(
