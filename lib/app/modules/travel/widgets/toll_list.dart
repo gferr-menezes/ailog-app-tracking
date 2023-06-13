@@ -43,8 +43,6 @@ class _TollListState extends State<TollList> {
       symbol: 'R\$',
     );
 
-    //BuildContext? _contextPopMenu;
-
     return Obx(
       () => travelController.loadingGetTolls
           ? const CustomLoading()

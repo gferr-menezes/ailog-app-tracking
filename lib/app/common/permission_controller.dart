@@ -27,7 +27,25 @@ class PermissionController {
     }
   }
 
+  static Future<bool> getStoragePermission() async {
+    var check = await Permission.storage.status;
+
+    if (check == PermissionStatus.denied) {
+      final result = await Permission.storage.request();
+      if (result == PermissionStatus.granted) {
+        return true;
+      }
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   static Future<PermissionStatus> checkGeolocationPermission() async {
     return Permission.location.status;
+  }
+
+  static Future<PermissionStatus> checkStoragePermission() async {
+    return Permission.storage.status;
   }
 }

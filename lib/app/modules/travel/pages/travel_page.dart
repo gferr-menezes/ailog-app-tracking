@@ -26,22 +26,7 @@ class TravelPage extends StatefulWidget {
 }
 
 class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
-  //StreamSubscription<Position>? _positionStreamSubscription;
-
-  // late LocationSettings locationSettings = AndroidSettings(
-  //   accuracy: LocationAccuracy.high,
-  //   distanceFilter: 1,
-  //   forceLocationManager: true,
-  //   intervalDuration: const Duration(minutes: 1),
-  //   //(Optional) Set foreground notification config to keep the app alive
-  //   //when going to the background
-  //   foregroundNotificationConfig: const ForegroundNotificationConfig(
-  //     notificationText: "Coletando dados de localização",
-  //     notificationTitle: "Ailog App",
-  //     enableWakeLock: true,
-  //   ),
-  // );
-
+  bool floatExtended = false;
   final TravelController travelController = Get.find<TravelController>();
   final GeolocationController geolocationController = Get.find<GeolocationController>();
   StreamSubscription<Position>? _positionStreamSubscription;
@@ -103,11 +88,6 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
       _positionStreamSubscription?.cancel();
     } else if (state == AppLifecycleState.paused) {
       log('message');
-      // _positionStreamSubscription = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
-      //   (Position? position) {
-      //     log("###### position stream ${DateTime.now()} $position");
-      //   },
-      // );
       Geolocation.callPositionStream().then((value) => _positionStreamSubscription = value);
     }
   }
@@ -148,12 +128,12 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return !_appPermissionLocation
-        ? ErrorLocationPermission(callback: validadePermission)
-        : SingleChildScrollView(
-            child: Obx(
-              () {
-                return travelController.loadingCheckTravelInitialized
+    return Obx(() {
+      return Scaffold(
+        body: !_appPermissionLocation
+            ? ErrorLocationPermission(callback: validadePermission)
+            : SingleChildScrollView(
+                child: travelController.loadingCheckTravelInitialized
                     ? const CustomLoading()
                     : !travelController.existTravelInitialized
                         ? const Padding(
@@ -213,9 +193,45 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
                                 ),
                               ),
                             ],
-                          );
-              },
-            ),
-          );
+                          ),
+              ),
+        floatingActionButton: travelController.existTravelInitialized == false
+            ? null
+            : FloatingActionButton.extended(
+                label: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        var travel = travelController.travel;
+
+                        setState(() {
+                          floatExtended = false;
+                        });
+
+                        Get.toNamed('/supply', arguments: {
+                          'travelId': travel.id,
+                          'travelIdApi': travel.travelIdApi,
+                        });
+                      },
+                      icon: const Icon(Icons.local_gas_station),
+                      tooltip: 'Abastecimento',
+                    ),
+                  ],
+                ),
+                isExtended: floatExtended,
+                icon: Icon(
+                  floatExtended == true ? Icons.close : Icons.menu,
+                  color: floatExtended == true ? Colors.red : Colors.white,
+                ),
+                onPressed: () {
+                  setState(() {
+                    floatExtended = !floatExtended;
+                  });
+                },
+                backgroundColor:
+                    floatExtended == true ? Theme.of(context).primaryColor.withOpacity(.7) : context.theme.primaryColor,
+              ),
+      );
+    });
   }
 }

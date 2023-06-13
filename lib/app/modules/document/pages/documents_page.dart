@@ -222,6 +222,11 @@ class _DocumentsPageState extends State<DocumentsPage> {
         cameraController.setFlashMode(FlashMode.off);
         XFile file = await cameraController.takePicture();
 
+        if (arguments != null && arguments!['returnImage']) {
+          Navigator.of(Get.context!).pop(file);
+          return;
+        }
+
         if (mounted) {
           setState(() {
             imagem = file;

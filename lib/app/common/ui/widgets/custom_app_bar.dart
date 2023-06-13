@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends AppBar {
-  CustomAppBar({Key? key, double elevation = 2})
+  CustomAppBar({Key? key, double elevation = 2, String? getCurrentRoute})
       : super(
           key: key,
           backgroundColor: Colors.white,

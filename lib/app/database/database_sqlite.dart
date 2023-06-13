@@ -10,7 +10,7 @@ class DatabaseSQLite {
 
     return await openDatabase(
       databaseFinalPath,
-      version: 7,
+      version: 9,
       onCreate: (Database db, int version) async {
         log('Criando banco de dados versão $version');
 
@@ -62,7 +62,7 @@ class DatabaseSQLite {
               accept_payment_proximity BOOLEAN DEFAULT 0,
               latitude double,
               longitude double,
-              url_voucher_image VARCHAR(255),
+              url_voucher_image VARCHAR(255)
             )
           ''');
 
@@ -102,6 +102,29 @@ class DatabaseSQLite {
               document_number_without_mask VARCHAR(255),
               cell_phone VARCHAR(255),
               phone VARCHAR(255)
+            )
+          ''');
+
+        batch.execute('''
+            CREATE TABLE IF NOT EXISTS supplies (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              supply_id_api INTEGER,
+              travel_id INTEGER NOT NULL,
+              travel_id_api VARCHAR(255),
+              value_liter FLOAT NOT NULL,
+              liters FLOAT NOT NULL,
+              odometer INTEGER NOT NULL,
+              path_image_pump VARCHAR(255),
+              url_image_pump VARCHAR(255),
+              path_image_odometer VARCHAR(255),
+              url_image_odometer VARCHAR(255),
+              path_image_invoice VARCHAR(255),
+              url_image_invoice VARCHAR(255),
+              date_supply DATE_TIME default CURRENT_TIMESTAMP,
+              status_send_api VARCHAR(100),
+              date_send_api DATE_TIME,
+              latitude double,
+              longitude double
             )
           ''');
 
@@ -200,6 +223,29 @@ class DatabaseSQLite {
             )
           ''');
 
+          batch.execute('''
+            CREATE TABLE IF NOT EXISTS supplies (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              supply_id_api INTEGER,
+              travel_id INTEGER NOT NULL,
+              travel_id_api VARCHAR(255),
+              value_liter FLOAT NOT NULL,
+              liters FLOAT NOT NULL,
+              odometer INTEGER NOT NULL,
+              path_image_pump VARCHAR(255),
+              url_image_pump VARCHAR(255),
+              path_image_odometer VARCHAR(255),
+              url_image_odometer VARCHAR(255),
+              path_image_invoice VARCHAR(255),
+              url_image_invoice VARCHAR(255),
+              date_supply DATE_TIME default CURRENT_TIMESTAMP,
+              status_send_api VARCHAR(100),
+              date_send_api DATE_TIME,
+              latitude double,
+              longitude double
+            )
+          ''');
+
           var checkColumnExists = await db.rawQuery('''
             SELECT * FROM pragma_table_info('tolls') WHERE name = 'latitude';
           ''');
@@ -237,6 +283,26 @@ class DatabaseSQLite {
           if (checkColumnExists.isEmpty) {
             batch.execute('''
               ALTER TABLE tolls ADD COLUMN url_voucher_image VARCHAR(255);
+            ''');
+          }
+
+          checkColumnExists = await db.rawQuery('''
+            SELECT * FROM pragma_table_info('supplies') WHERE name = 'latitude';
+          ''');
+
+          if (checkColumnExists.isEmpty) {
+            batch.execute('''
+              ALTER TABLE supplies ADD COLUMN latitude double;
+            ''');
+          }
+
+          checkColumnExists = await db.rawQuery('''
+            SELECT * FROM pragma_table_info('supplies') WHERE name = 'longitude';
+          ''');
+
+          if (checkColumnExists.isEmpty) {
+            batch.execute('''
+              ALTER TABLE supplies ADD COLUMN longitude double;
             ''');
           }
 
