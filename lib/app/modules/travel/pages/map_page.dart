@@ -1,8 +1,12 @@
 import 'dart:developer';
 
+import 'package:ailog_app_tracking/app/modules/travel/models/address_model.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 
 import '../../../common/ui/widgets/custom_app_bar.dart';
 import '../../../common/ui/widgets/custom_loading.dart';
@@ -20,6 +24,8 @@ class MapPageState extends State<MapPage> {
 
   bool loadingMap = true;
 
+  CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +34,12 @@ class MapPageState extends State<MapPage> {
         loadingMap = false;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _customInfoWindowController.dispose();
+    super.dispose();
   }
 
   _onMapTypeButtonPressed() {
@@ -44,7 +56,8 @@ class MapPageState extends State<MapPage> {
 
     var argumentsPage = Get.arguments;
 
-    log(argumentsPage.toString());
+    AddressModel? address;
+    TollModel? toll;
 
     String? originPage;
     if (argumentsPage != null) {
@@ -61,6 +74,14 @@ class MapPageState extends State<MapPage> {
         latLongList.add(LatLng(geolocation.latitude, geolocation.longitude));
       }
     } else {
+      if (originPage == 'address') {
+        address = argumentsPage?['address_data'];
+      }
+
+      if (originPage == 'toll_list') {
+        toll = argumentsPage?['toll_data'];
+      }
+
       latLongList.add(LatLng(argumentsPage?['latitude'], argumentsPage?['longitude']));
     }
 
@@ -91,14 +112,36 @@ class MapPageState extends State<MapPage> {
                   ),
                   mapType: _currentMapType,
                   markers: {
-                    Marker(
-                      markerId: const MarkerId("source"),
-                      position: latLongList.first,
-                      infoWindow: InfoWindow(
-                        title: 'Origem',
-                        snippet: 'Lat: ${latLongList.first.latitude} - Long: ${latLongList.first.longitude}',
+                    if (originPage == 'toll_list')
+                      Marker(
+                        markerId: const MarkerId("source"),
+                        position: latLongList.first,
+                        infoWindow: InfoWindow(
+                          title: 'Pedágio: ${toll?.tollName.toUpperCase()}',
+                          snippet:
+                              'Valor: ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(toll?.valueTag ?? 0)}',
+                        ),
                       ),
-                    ),
+                    if (originPage == 'address')
+                      Marker(
+                        markerId: const MarkerId("source"),
+                        position: latLongList.first,
+                        infoWindow: InfoWindow(
+                          title: address?.client?.name == null
+                              ? getTextAddress(address)
+                              : 'Cliente: ${address?.client?.name ?? ' - '}',
+                          snippet: address?.client?.name == null ? '' : getTextAddress(address),
+                        ),
+                      ),
+                    if (originPage != 'address' && originPage != 'toll_list')
+                      Marker(
+                        markerId: const MarkerId("source"),
+                        position: latLongList.first,
+                        infoWindow: InfoWindow(
+                          title: 'Origem',
+                          snippet: 'Lat: ${latLongList.first.latitude} - Long: ${latLongList.first.longitude}',
+                        ),
+                      ),
                     Marker(
                       markerId: const MarkerId("destination"),
                       position: latLongList.last,
@@ -139,5 +182,20 @@ class MapPageState extends State<MapPage> {
               ],
             ),
     );
+  }
+
+  String getTextAddress(AddressModel? address) {
+    String textAddress = '';
+
+    if (address != null) {
+      if (address.address != null) {
+        textAddress =
+            '${address.address?.toUpperCase()}, ${address.number} - ${address.city}, ${address.city.toUpperCase()} - ${address.state.toUpperCase()}';
+      } else {
+        textAddress = '${address.city.toUpperCase()} - ${address.state.toUpperCase()}';
+      }
+    }
+
+    return textAddress;
   }
 }

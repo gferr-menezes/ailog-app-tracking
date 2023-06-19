@@ -25,4 +25,8 @@ class SupplyService {
   Future<String> uploadImage({required Uint8List image, required String travelIdApi, required String typeImage}) async {
     return await _supplyApiRepository.uploadImage(image: image, travelIdApi: travelIdApi, typeImage: typeImage);
   }
+
+  Future<void> sendSupply({required SupplyModel supply}) async {
+    await _supplyApiRepository.sendSupply(supply: supply);
+  }
 }

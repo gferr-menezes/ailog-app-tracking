@@ -17,6 +17,7 @@ class SupplyModel {
   final DateTime? dateSendApi;
   final double? latitude;
   final double? longitude;
+  String? ocrRecibo;
 
   SupplyModel({
     this.id,
@@ -37,6 +38,7 @@ class SupplyModel {
     this.dateSendApi,
     this.latitude,
     this.longitude,
+    this.ocrRecibo,
   });
 
   factory SupplyModel.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,7 @@ class SupplyModel {
       dateSendApi: json['date_send_api'] != null ? DateTime.parse(json['date_send_api']) : null,
       latitude: json['latitude'],
       longitude: json['longitude'],
+      ocrRecibo: json['ocr_recibo'],
     );
   }
 
@@ -82,11 +85,12 @@ class SupplyModel {
       'date_send_api': dateSendApi?.toIso8601String(),
       'latitude': latitude,
       'longitude': longitude,
+      'ocr_recibo': ocrRecibo,
     };
   }
 
   @override
   String toString() {
-    return 'Supply(id: $id, supplyIdApi: $supplyIdApi, travelId: $travelId, travelIdApi: $travelIdApi, valueLiter: $valueLiter, liters: $liters, odometer: $odometer, pathImagePump: $pathImagePump, urlImagePump: $urlImagePump, pathImageOdometer: $pathImageOdometer, urlImageOdometer: $urlImageOdometer, pathImageInvoice: $pathImageInvoice, urlImageInvoice: $urlImageInvoice, dateSupply: $dateSupply, statusSendApi: $statusSendApi, dateSendApi: $dateSendApi, latitude: $latitude, longitude: $longitude)';
+    return 'Supply(id: $id, supplyIdApi: $supplyIdApi, travelId: $travelId, travelIdApi: $travelIdApi, valueLiter: $valueLiter, liters: $liters, odometer: $odometer, pathImagePump: $pathImagePump, urlImagePump: $urlImagePump, pathImageOdometer: $pathImageOdometer, urlImageOdometer: $urlImageOdometer, pathImageInvoice: $pathImageInvoice, urlImageInvoice: $urlImageInvoice, dateSupply: $dateSupply, statusSendApi: $statusSendApi, dateSendApi: $dateSendApi, latitude: $latitude, longitude: $longitude, ocrRecibo: $ocrRecibo)';
   }
 }

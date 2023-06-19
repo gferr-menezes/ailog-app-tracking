@@ -6,6 +6,7 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:validatorless/validatorless.dart';
 
 import '../../../common/contracts.dart';
@@ -38,6 +39,7 @@ class _SupplyCreateOrEditState extends State<SupplyCreateOrEdit> {
   XFile? _imagePump;
   XFile? _imageReceipt;
   XFile? _imageOdometer;
+  final _textRecognizer = TextRecognizer();
 
   final moneyMask = CurrencyTextInputFormatter(
     locale: 'pt_BR',
@@ -470,7 +472,16 @@ class _SupplyCreateOrEditState extends State<SupplyCreateOrEdit> {
                                 supply.pathImageOdometer = null;
                               }
 
+                              /** generate ocr */
+                              if (_imageReceipt != null) {
+                                final file = File(_imageReceipt!.path);
+                                final inputImage = InputImage.fromFile(file);
+                                final recognizedText = await _textRecognizer.processImage(inputImage);
+                                supply.ocrRecibo = recognizedText.text;
+                              }
+
                               supplyController.insert(supply: supply);
+                              supplyController.sendSupply(supply: supply);
                               supplyController.getAll(travelId: travelId!);
 
                               /** reset form */
@@ -487,7 +498,7 @@ class _SupplyCreateOrEditState extends State<SupplyCreateOrEdit> {
                           },
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

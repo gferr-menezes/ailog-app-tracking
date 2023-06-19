@@ -156,6 +156,7 @@ class _TollListState extends State<TollList> {
                                       Get.toNamed(
                                         '/travel/map',
                                         arguments: {
+                                          'toll_data': toll,
                                           'latitude': toll.latitude,
                                           'longitude': toll.longitude,
                                           'origin': 'toll_list',

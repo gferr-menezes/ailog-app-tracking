@@ -181,6 +181,7 @@ class _AddressListState extends State<AddressList> {
                                                         Get.toNamed(
                                                           '/travel/map',
                                                           arguments: {
+                                                            'address_data': address,
                                                             'latitude': address.latitude,
                                                             'longitude': address.longitude,
                                                             'origin': 'address',

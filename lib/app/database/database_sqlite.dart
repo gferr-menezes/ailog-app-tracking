@@ -10,7 +10,7 @@ class DatabaseSQLite {
 
     return await openDatabase(
       databaseFinalPath,
-      version: 9,
+      version: 10,
       onCreate: (Database db, int version) async {
         log('Criando banco de dados versão $version');
 
@@ -124,7 +124,8 @@ class DatabaseSQLite {
               status_send_api VARCHAR(100),
               date_send_api DATE_TIME,
               latitude double,
-              longitude double
+              longitude double,
+              ocr_recibo TEXT
             )
           ''');
 
@@ -242,7 +243,8 @@ class DatabaseSQLite {
               status_send_api VARCHAR(100),
               date_send_api DATE_TIME,
               latitude double,
-              longitude double
+              longitude double,
+              ocr_recibo TEXT
             )
           ''');
 
@@ -303,6 +305,16 @@ class DatabaseSQLite {
           if (checkColumnExists.isEmpty) {
             batch.execute('''
               ALTER TABLE supplies ADD COLUMN longitude double;
+            ''');
+          }
+
+          checkColumnExists = await db.rawQuery('''
+            SELECT * FROM pragma_table_info('supplies') WHERE name = 'ocr_recibo';
+          ''');
+
+          if (checkColumnExists.isEmpty) {
+            batch.execute('''
+              ALTER TABLE supplies ADD COLUMN ocr_recibo TEXT;
             ''');
           }
 

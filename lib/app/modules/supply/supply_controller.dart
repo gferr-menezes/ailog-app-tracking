@@ -89,9 +89,9 @@ class SupplyController extends GetxController {
         backgroundColor: Colors.red,
         textColor: Colors.white,
       );
-      throw Exception('Erro ao salvar dados');
-    } finally {
+
       hideLoading();
+      throw Exception('Erro ao salvar dados');
     }
   }
 
@@ -120,6 +120,10 @@ class SupplyController extends GetxController {
     } finally {
       hideLoading();
     }
+  }
+
+  Future<void> sendSupply({required SupplyModel supply}) async {
+    await _supplyService.sendSupply(supply: supply);
   }
 
   // Getters and Setters
