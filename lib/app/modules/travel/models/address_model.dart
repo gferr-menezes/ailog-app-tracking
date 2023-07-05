@@ -83,10 +83,10 @@ class AddressModel {
     data['complement'] = complement;
     data['latitude'] = latitude;
     data['longitude'] = longitude;
-    data['estimated_departure'] = estimatedDeparture.toString();
-    data['estimated_arrival'] = estimatedArrival.toString();
-    data['real_departure'] = realDeparture.toString();
-    data['real_arrival'] = realArrival.toString();
+    data['estimated_departure'] = estimatedDeparture?.toString();
+    data['estimated_arrival'] = estimatedArrival?.toString();
+    data['real_departure'] = realDeparture?.toString();
+    data['real_arrival'] = realArrival?.toString();
     data['client'] = client?.toJson();
     return data;
   }

@@ -1,3 +1,5 @@
+import 'package:ailog_app_tracking/app/modules/travel/controllers/ocurrence_controller.dart';
+import 'package:ailog_app_tracking/app/modules/travel/services/occurence_service.dart';
 import 'package:get/get.dart';
 
 import '../../common/rest_client.dart';
@@ -36,13 +38,22 @@ class TravelBinding implements Bindings {
       ),
     );
 
+    Get.lazyPut<OccurenceService>(
+      () => OccurenceService(
+        travelRepository: Get.find<TravelRepository>(),
+      ),
+    );
+
     /**
      * controllers
      */
     Get.lazyPut<TravelController>(() => TravelController(travelService: Get.find<TravelService>()));
+
     Get.lazyPut<GeolocationController>(
       () => GeolocationController(
           travelService: Get.find<TravelService>(), geolocationService: Get.find<GeolocationService>()),
     );
+
+    Get.lazyPut<OcurrenceController>(() => OcurrenceController(occurenceService: Get.find<OccurenceService>()));
   }
 }

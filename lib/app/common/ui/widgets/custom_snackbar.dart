@@ -10,6 +10,7 @@ class CustomSnackbar {
   static void show(BuildContext context, {required String message, Color? backgroundColor, Color? textColor}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        behavior: SnackBarBehavior.floating,
         backgroundColor: backgroundColor ?? Colors.black,
         duration: const Duration(
           seconds: 3,

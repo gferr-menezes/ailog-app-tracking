@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_button.dart';
 import 'package:ailog_app_tracking/app/common/ui/widgets/custom_loading.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../common/ui/widgets/custom_snackbar.dart';
-import 'package:image/image.dart' as IMG;
 
 class DocumentsPage extends StatefulWidget {
   const DocumentsPage({Key? key}) : super(key: key);
@@ -183,25 +181,35 @@ class _DocumentsPageState extends State<DocumentsPage> {
       return Stack(
         children: [
           CameraPreview(cameraController),
-          arguments != null && arguments!['typePhoto'] == 'receipt' ||
-                  arguments != null && arguments!['typePhoto'] == 'odometer'
-              ? Container(
-                  width: size!.width,
-                  height: size!.height,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: Colors.black.withOpacity(0.7),
-                        width: (size!.height - size!.width) / 1,
-                      ),
-                      bottom: BorderSide(
-                        color: Colors.black.withOpacity(0.7),
-                        width: (size!.height - size!.width) / 2,
-                      ),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
+          // arguments != null && arguments!['typePhoto'] == 'receipt' ||
+          //         arguments != null && arguments!['typePhoto'] == 'odometer'
+          //     ? GestureDetector(
+          //         onPanStart: (details) {
+          //           setState(() {
+          //             xPosition = details.localPosition.dx.toInt();
+          //             yPosition = details.localPosition.dy.toInt();
+          //           });
+
+          //           _takePicture();
+          //         },
+          //         child: Container(
+          //           width: size!.width,
+          //           height: size!.height,
+          //           decoration: BoxDecoration(
+          //             border: Border(
+          //               top: BorderSide(
+          //                 color: Colors.black.withOpacity(0.7),
+          //                 width: (size!.height - size!.width) / 1,
+          //               ),
+          //               bottom: BorderSide(
+          //                 color: Colors.black.withOpacity(0.7),
+          //                 width: (size!.height - size!.width) / 2,
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       )
+          //     : const SizedBox.shrink(),
           _captureWidget(),
         ],
       );
@@ -246,10 +254,6 @@ class _DocumentsPageState extends State<DocumentsPage> {
         XFile file = await cameraController.takePicture();
 
         if (arguments != null && arguments!['returnImage']) {
-          if (arguments!['typePhoto'] == 'receipt' || arguments!['typePhoto'] == 'odometer') {
-            file = await cropSquare(file.path, file.path, false);
-          }
-
           Navigator.of(Get.context!).pop(file);
           return;
         }
@@ -263,24 +267,5 @@ class _DocumentsPageState extends State<DocumentsPage> {
         print(e.description);
       }
     }
-  }
-
-  Future<XFile> cropSquare(String srcFilePath, String destFilePath, bool flip) async {
-    var bytes = await File(srcFilePath).readAsBytes();
-    IMG.Image src = IMG.decodeImage(bytes)!;
-
-    var cropSize = min(src.width, src.height);
-    int offsetX = (src.width - min(src.width, src.height)) ~/ 1;
-    int offsetY = (src.height - 140 - min(src.width, src.height)) ~/ 0.6;
-
-    IMG.Image destImage = IMG.copyCrop(src, offsetX, offsetY, cropSize, 480);
-
-    if (flip) {
-      destImage = IMG.flipVertical(destImage);
-    }
-
-    var jpg = IMG.encodeJpg(destImage);
-    await File(destFilePath).writeAsBytes(jpg);
-    return XFile(destFilePath);
   }
 }

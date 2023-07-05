@@ -14,11 +14,11 @@ class TravelData extends StatelessWidget {
     var travel = travelController.travel;
 
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(
-          10.0,
-        ),
-      ),
+      // shape: RoundedRectangleBorder(
+      //   borderRadius: BorderRadius.circular(
+      //     10.0,
+      //   ),
+      // ),
       color: Colors.white,
       elevation: 5,
       child: Padding(

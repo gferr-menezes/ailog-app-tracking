@@ -18,6 +18,7 @@ class TravelController extends GetxController {
   final _loadingGetAddresses = false.obs;
   final _loadingGetTolls = false.obs;
   final _loadingInformValuePay = false.obs;
+  final _loadingRegisterActionClient = false.obs;
 
   final _travel = TravelModel().obs;
   final _addresses = <AddressModel>[].obs;
@@ -107,7 +108,6 @@ class TravelController extends GetxController {
     }
   }
 
-  // tolls
   Future<void> getTolls({required int travelId}) async {
     try {
       loadingGetTolls = true;
@@ -184,6 +184,50 @@ class TravelController extends GetxController {
     }
   }
 
+  Future<void> registerArrivalClient(TravelModel travel, AddressModel address) async {
+    try {
+      loadingRegisterActionClient = true;
+      await _travelService.registerArrivalClient(travel: travel, address: address);
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Chegada do cliente registrada com sucesso',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Erro ao registrar chegada do cliente',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    } finally {
+      loadingRegisterActionClient = false;
+    }
+  }
+
+  Future<void> registerDepartureClient(TravelModel travel, AddressModel address) async {
+    try {
+      loadingRegisterActionClient = true;
+      await _travelService.registerDepartureClient(travel: travel, address: address);
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Saída do cliente registrada com sucesso',
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+    } catch (e) {
+      CustomSnackbar.show(
+        Get.context!,
+        message: 'Erro ao registrar saída do cliente',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    } finally {
+      loadingRegisterActionClient = false;
+    }
+  }
+
   void closeTollListPopMenu() {
     popMenuTollIsVisible.value = false;
     Navigator.of(contextPopMenu!).pop();
@@ -229,6 +273,9 @@ class TravelController extends GetxController {
   set loadingInformValuePay(bool value) {
     _loadingInformValuePay.value = value;
   }
+
+  bool get loadingRegisterActionClient => _loadingRegisterActionClient.value;
+  set loadingRegisterActionClient(bool value) => _loadingRegisterActionClient.value = value;
 
   TravelModel get travel => _travel.value;
   set travel(TravelModel value) {

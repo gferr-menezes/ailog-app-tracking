@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:ailog_app_tracking/app/common/ui/widgets/error_location_permission.dart';
+import 'package:ailog_app_tracking/app/modules/travel/pages/rotogram_page.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -15,6 +16,7 @@ import '../controllers/geolocation_controller.dart';
 import '../controllers/travel_controller.dart';
 import '../widgets/address_list.dart';
 import '../widgets/form_travel.dart';
+import '../widgets/occurrence_list.dart';
 import '../widgets/toll_list.dart';
 import '../widgets/travel_data.dart';
 
@@ -62,11 +64,8 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
 
     Timer.periodic(const Duration(minutes: 2), (timer) async {
       var position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      print("#################### collectLatitudeLongitude");
       Position? lastPosition = await Geolocator.getLastKnownPosition();
-      if (lastPosition != null) {
-        print("#################### lastPosition $lastPosition");
-      }
+      if (lastPosition != null) {}
       geolocationController.collectLatitudeLongitude(position);
     });
 
@@ -84,38 +83,11 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // _getPositionEveryTime();
       _positionStreamSubscription?.cancel();
     } else if (state == AppLifecycleState.paused) {
       log('message');
       Geolocation.callPositionStream().then((value) => _positionStreamSubscription = value);
     }
-  }
-
-  Position? _currentPosition;
-
-  Future<bool> _handleLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      print('Location services are disabled.');
-      return false;
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print("Location permissions are denied");
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      print("Location permissions are permanently denied, we cannot request permissions.");
-      return false;
-    }
-    return true;
   }
 
   validadePermission(bool check) {
@@ -128,13 +100,15 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      return Scaffold(
-        body: !_appPermissionLocation
-            ? ErrorLocationPermission(callback: validadePermission)
-            : SingleChildScrollView(
-                child: travelController.loadingCheckTravelInitialized
-                    ? const CustomLoading()
+    return Scaffold(
+      body: !_appPermissionLocation
+          ? ErrorLocationPermission(callback: validadePermission)
+          : SafeArea(
+              child: Obx(
+                () => travelController.loadingCheckTravelInitialized
+                    ? const Center(
+                        child: CustomLoading(),
+                      )
                     : !travelController.existTravelInitialized
                         ? const Padding(
                             padding: EdgeInsets.only(left: 5, top: 30, right: 5, bottom: 20),
@@ -142,52 +116,65 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
                           )
                         : Column(
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.only(top: 5, left: 5, right: 5),
+                              const SizedBox(
+                                height: 253,
                                 child: TravelData(),
                               ),
-                              SizedBox(
-                                height: context.height * 0.5,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 5, top: 5, right: 5, bottom: 5),
-                                  child: DefaultTabController(
-                                    length: 2,
-                                    child: Scaffold(
-                                      appBar: PreferredSize(
-                                          preferredSize: const Size.fromHeight(40),
-                                          child: AppBar(
-                                            backgroundColor: context.theme.primaryColorLight,
-                                            automaticallyImplyLeading: false,
-                                            flexibleSpace: Column(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                TabBar(
-                                                  indicatorColor: context.theme.primaryColor,
-                                                  labelColor: Colors.black,
-                                                  tabs: const [
-                                                    SizedBox(
-                                                      height: 30,
-                                                      child: Tab(
-                                                        text: 'ENDEREÇOS',
-                                                      ),
+                              Expanded(
+                                child: DefaultTabController(
+                                  length: 4,
+                                  child: Scaffold(
+                                    appBar: PreferredSize(
+                                        preferredSize: const Size.fromHeight(40),
+                                        child: AppBar(
+                                          backgroundColor: context.theme.primaryColorLight,
+                                          automaticallyImplyLeading: false,
+                                          flexibleSpace: Column(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              TabBar(
+                                                indicatorColor: context.theme.primaryColor,
+                                                labelColor: Colors.black,
+                                                isScrollable: true,
+                                                tabs: const [
+                                                  SizedBox(
+                                                    height: 30,
+                                                    child: Tab(
+                                                      text: 'ROTOGRAMA',
                                                     ),
-                                                    SizedBox(
-                                                      height: 30,
-                                                      child: Tab(
-                                                        text: 'PEDÁGIOS',
-                                                      ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 30,
+                                                    child: Tab(
+                                                      text: 'ENDEREÇOS',
                                                     ),
-                                                  ],
-                                                )
-                                              ],
-                                            ),
-                                          )),
-                                      body: const TabBarView(
-                                        children: [
-                                          AddressList(),
-                                          TollList(),
-                                        ],
-                                      ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 30,
+                                                    child: Tab(
+                                                      text: 'PEDÁGIOS',
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 30,
+                                                    child: Tab(
+                                                      text: 'OCORRÊNCIAS',
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        )),
+                                    body: TabBarView(
+                                      children: [
+                                        const RotogramPage(),
+                                        const AddressList(),
+                                        const TollList(),
+                                        OccurrenceList(
+                                          travelApiId: travelController.travel.travelIdApi!,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -195,43 +182,7 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
                             ],
                           ),
               ),
-        floatingActionButton: travelController.existTravelInitialized == false
-            ? null
-            : FloatingActionButton.extended(
-                label: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        var travel = travelController.travel;
-
-                        setState(() {
-                          floatExtended = false;
-                        });
-
-                        Get.toNamed('/supply', arguments: {
-                          'travelId': travel.id,
-                          'travelIdApi': travel.travelIdApi,
-                        });
-                      },
-                      icon: const Icon(Icons.local_gas_station),
-                      tooltip: 'Abastecimento',
-                    ),
-                  ],
-                ),
-                isExtended: floatExtended,
-                icon: Icon(
-                  floatExtended == true ? Icons.close : Icons.menu,
-                  color: floatExtended == true ? Colors.red : Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    floatExtended = !floatExtended;
-                  });
-                },
-                backgroundColor:
-                    floatExtended == true ? Theme.of(context).primaryColor.withOpacity(.7) : context.theme.primaryColor,
-              ),
-      );
-    });
+            ),
+    );
   }
 }

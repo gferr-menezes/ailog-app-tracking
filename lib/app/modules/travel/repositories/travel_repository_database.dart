@@ -13,4 +13,6 @@ abstract class TravelRepositoryDatabase {
   Future<void> updateGeolocations({required List<GeolocationModel> geolocations});
   Future<void> updateTravel({required TravelModel travel});
   Future<void> updateToll({required TollModel toll});
+  Future<void> registerArrivalClient({required AddressModel address});
+  Future<void> registerDepartureClient({required AddressModel address});
 }

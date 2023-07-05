@@ -11,6 +11,8 @@ class CustomTextFormField extends StatelessWidget {
   final void Function()? clearText;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
+  final void Function()? onTap;
+  final bool readOnly;
 
   const CustomTextFormField({
     Key? key,
@@ -22,17 +24,21 @@ class CustomTextFormField extends StatelessWidget {
     this.clearText,
     this.inputFormatters,
     this.keyboardType,
+    this.onTap,
+    this.readOnly = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      readOnly: readOnly,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       controller: controller,
       obscureText: obscureText,
       validator: validator,
       onChanged: onChanged,
+      onTap: onTap,
       cursorColor: context.theme.primaryColor,
       decoration: InputDecoration(
         suffixIcon: clearText != null

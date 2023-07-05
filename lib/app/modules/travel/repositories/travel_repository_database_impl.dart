@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../../database/database_sqlite.dart';
 import '../models/address_model.dart';
 import '../models/geolocation_model.dart';
@@ -305,5 +307,51 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
       where: 'id = ?',
       whereArgs: [toll.id],
     );
+  }
+
+  @override
+  Future<void> registerArrivalClient({required AddressModel address}) async {
+    try {
+      final db = await DatabaseSQLite().openConnection();
+
+      final addressData = await db.query('travel_addresses', where: 'id = ?', whereArgs: [address.id]);
+
+      if (addressData.isNotEmpty) {
+        await db.update(
+          'travel_addresses',
+          {
+            'real_arrival': DateTime.now().toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [address.id],
+        );
+      }
+    } catch (e) {
+      log('registerArrivalClient error: $e');
+      throw Exception(e);
+    }
+  }
+
+  @override
+  Future<void> registerDepartureClient({required AddressModel address}) async {
+    try {
+      final db = await DatabaseSQLite().openConnection();
+
+      final addressData = await db.query('travel_addresses', where: 'id = ?', whereArgs: [address.id]);
+
+      if (addressData.isNotEmpty) {
+        await db.update(
+          'travel_addresses',
+          {
+            'real_departure': DateTime.now().toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [address.id],
+        );
+      }
+    } catch (e) {
+      log('registerDepartureClient error: $e');
+      throw Exception(e);
+    }
   }
 }

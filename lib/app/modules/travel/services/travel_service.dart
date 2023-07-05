@@ -1,3 +1,4 @@
+import 'package:ailog_app_tracking/app/modules/travel/models/occurrence_model.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/response_status_api.dart';
@@ -52,6 +53,7 @@ class TravelService {
 
         /** tolls */
         final tollsData = travel['pedagios'] as List;
+
         for (var toll in tollsData) {
           DateTime? datePassage;
 
@@ -104,19 +106,19 @@ class TravelService {
           DateTime? realArrival;
 
           if (address['dataHoraPrevisaoSaida'] != null) {
-            estimatedDeparture = inputFormat.parse(travel['dataHoraPrevisaoSaida']);
+            estimatedDeparture = inputFormat.parse(address['dataHoraPrevisaoSaida']);
           }
 
           if (address['dataHoraPrevisaoChegada'] != null) {
-            estimatedArrival = inputFormat.parse(travel['dataHoraPrevisaoChegada']);
+            estimatedArrival = inputFormat.parse(address['dataHoraPrevisaoChegada']);
           }
 
           if (address['dataHoraSaidaReal'] != null) {
-            realDeparture = inputFormat.parse(travel['dataHoraSaidaReal']);
+            realDeparture = inputFormat.parse(address['dataHoraSaidaReal']);
           }
 
           if (address['dataHoraChegadaReal'] != null) {
-            realArrival = inputFormat.parse(travel['dataHoraChegadaReal']);
+            realArrival = inputFormat.parse(address['dataHoraChegadaReal']);
           }
 
           addresses.add(
@@ -216,5 +218,27 @@ class TravelService {
     } catch (e) {
       throw Exception(e);
     }
+  }
+
+  Future<void> saveOccurence({
+    required TravelModel travel,
+    required OccurrenceModel occurrence,
+    AddressModel? address,
+  }) async {
+    try {
+      await _travelRepository.saveOccurrence(travel: travel, ocurrence: occurrence, address: address);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<void> registerArrivalClient({required TravelModel travel, required AddressModel address}) async {
+    await _travelRepository.sendRegisterArrivalClient(travel: travel, address: address);
+    await _travelRepositoryDatabase.registerArrivalClient(address: address);
+  }
+
+  Future<void> registerDepartureClient({required TravelModel travel, required AddressModel address}) async {
+    await _travelRepository.sendRegisterDepartureClient(travel: travel, address: address);
+    await _travelRepositoryDatabase.registerDepartureClient(address: address);
   }
 }

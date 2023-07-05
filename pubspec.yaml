@@ -53,6 +53,9 @@ dependencies:
   open_file: ^3.3.1
   flutter_file_downloader: ^1.1.2
   google_mlkit_text_recognition: ^0.8.1
+  flutter_localization: ^0.1.12
+  camera_camera: ^3.0.0
+  image: ^3.3.0
   custom_info_window: ^1.0.1
 
   # The following adds the Cupertino Icons font to your application.

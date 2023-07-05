@@ -12,6 +12,7 @@ class HomeController extends GetxController {
   static const NAVIGATOR_KEY = 1;
 
   final _tabIndex = 0.obs;
+  final _floatExtended = false.obs;
 
   int get tabIndex => _tabIndex.value;
   final _tabs = [
@@ -23,6 +24,9 @@ class HomeController extends GetxController {
     _tabIndex(index);
     Get.toNamed(_tabs[index], id: NAVIGATOR_KEY);
   }
+
+  bool get floatExtended => _floatExtended.value;
+  set floatExtended(bool value) => _floatExtended(value);
 
   Route? onGenerateRouter(RouteSettings settings) {
     if (settings.name == '/travel') {

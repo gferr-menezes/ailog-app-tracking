@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:ailog_app_tracking/app/modules/travel/models/address_model.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/occurrence_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +20,10 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   MapType _currentMapType = MapType.normal;
+  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
 
   bool loadingMap = true;
-
-  CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
+  bool _infoWindowShown = false;
 
   @override
   void initState() {
@@ -38,7 +37,6 @@ class MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
-    _customInfoWindowController.dispose();
     super.dispose();
   }
 
@@ -58,6 +56,7 @@ class MapPageState extends State<MapPage> {
 
     AddressModel? address;
     TollModel? toll;
+    OccurrenceModel? occurrence;
 
     String? originPage;
     if (argumentsPage != null) {
@@ -69,7 +68,7 @@ class MapPageState extends State<MapPage> {
 
     late List<LatLng> latLongList = [];
 
-    if (originPage == null || originPage != 'address' && originPage != 'toll_list') {
+    if (originPage == null || originPage != 'address' && originPage != 'toll_list' && originPage != 'occurrence_list') {
       for (var geolocation in geolocations) {
         latLongList.add(LatLng(geolocation.latitude, geolocation.longitude));
       }
@@ -80,6 +79,10 @@ class MapPageState extends State<MapPage> {
 
       if (originPage == 'toll_list') {
         toll = argumentsPage?['toll_data'];
+      }
+
+      if (originPage == 'occurrence_list') {
+        occurrence = argumentsPage?['occurrence_data'];
       }
 
       latLongList.add(LatLng(argumentsPage?['latitude'], argumentsPage?['longitude']));
@@ -106,6 +109,12 @@ class MapPageState extends State<MapPage> {
           : Stack(
               children: [
                 GoogleMap(
+                  onTap: (argument) {
+                    setState(() {
+                      _infoWindowShown = false;
+                    });
+                    _customInfoWindowController.hideInfoWindow!();
+                  },
                   initialCameraPosition: CameraPosition(
                     target: latLongList.last,
                     zoom: 16,
@@ -116,24 +125,212 @@ class MapPageState extends State<MapPage> {
                       Marker(
                         markerId: const MarkerId("source"),
                         position: latLongList.first,
-                        infoWindow: InfoWindow(
-                          title: 'Pedágio: ${toll?.tollName.toUpperCase()}',
-                          snippet:
-                              'Valor: ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(toll?.valueTag ?? 0)}',
-                        ),
+                        onTap: () {
+                          setState(() {
+                            _infoWindowShown = !_infoWindowShown;
+                          });
+
+                          if (_infoWindowShown == true) {
+                            _customInfoWindowController.addInfoWindow!(
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  height: 300,
+                                  width: 200,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        width: 300,
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(
+                                                '${toll?.tollName.toUpperCase()}',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(
+                                                NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$')
+                                                    .format(toll?.valueTag ?? 0),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                latLongList.first);
+                          } else {
+                            _customInfoWindowController.hideInfoWindow!();
+                            setState(() {
+                              _infoWindowShown = !_infoWindowShown;
+                            });
+                          }
+                        },
                       ),
                     if (originPage == 'address')
                       Marker(
                         markerId: const MarkerId("source"),
                         position: latLongList.first,
-                        infoWindow: InfoWindow(
-                          title: address?.client?.name == null
-                              ? getTextAddress(address)
-                              : 'Cliente: ${address?.client?.name ?? ' - '}',
-                          snippet: address?.client?.name == null ? '' : getTextAddress(address),
-                        ),
+                        onTap: () {
+                          setState(() {
+                            _infoWindowShown = !_infoWindowShown;
+                          });
+
+                          if (_infoWindowShown == true) {
+                            _customInfoWindowController.addInfoWindow!(
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  height: 100,
+                                  width: 200,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        width: 300,
+                                        child: Column(
+                                          children: [
+                                            address?.typeOperation != null
+                                                ? SizedBox(
+                                                    height: 20,
+                                                    child: Text(
+                                                      '${address!.typeOperation?.toUpperCase()}',
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : const SizedBox.shrink(),
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(
+                                                getTextAddress(address),
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            address?.client?.name != null
+                                                ? SizedBox(
+                                                    height: 20,
+                                                    child: Text(
+                                                      'CLIENTE: ${address?.client?.name.toUpperCase()}',
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : const SizedBox.shrink(),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                latLongList.first);
+                          } else {
+                            _customInfoWindowController.hideInfoWindow!();
+                            setState(() {
+                              _infoWindowShown = !_infoWindowShown;
+                            });
+                          }
+                        },
                       ),
-                    if (originPage != 'address' && originPage != 'toll_list')
+                    if (originPage == 'occurrence_list')
+                      Marker(
+                        markerId: const MarkerId("source"),
+                        position: latLongList.first,
+                        onTap: () {
+                          setState(() {
+                            _infoWindowShown = !_infoWindowShown;
+                          });
+
+                          if (_infoWindowShown == true) {
+                            _customInfoWindowController.addInfoWindow!(
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  height: 300,
+                                  width: 200,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        width: 300,
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(
+                                                '${occurrence!.typeOccurrence.description?.toUpperCase()}',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            occurrence.client != null
+                                                ? SizedBox(
+                                                    height: 20,
+                                                    child: Text(
+                                                      'CLIENTE: ${occurrence?.client?.name.toUpperCase()}',
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : const SizedBox.shrink(),
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(getTextAddress(occurrence.address)),
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(
+                                                DateFormat('dd/MM/yyyy HH:mm').format(occurrence.dateHour),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                latLongList.first);
+                          } else {
+                            setState(() {
+                              _infoWindowShown = false;
+                            });
+                            _customInfoWindowController.hideInfoWindow!();
+                          }
+                        },
+                      ),
+                    if (originPage != 'address' && originPage != 'toll_list' && originPage != 'occurrence_list')
                       Marker(
                         markerId: const MarkerId("source"),
                         position: latLongList.first,
@@ -142,14 +339,15 @@ class MapPageState extends State<MapPage> {
                           snippet: 'Lat: ${latLongList.first.latitude} - Long: ${latLongList.first.longitude}',
                         ),
                       ),
-                    Marker(
-                      markerId: const MarkerId("destination"),
-                      position: latLongList.last,
-                      infoWindow: InfoWindow(
-                        title: 'Destino',
-                        snippet: 'Lat: ${latLongList.last.latitude} - Long: ${latLongList.last.longitude}',
+                    if (originPage != 'address' && originPage != 'toll_list' && originPage != 'occurrence_list')
+                      Marker(
+                        markerId: const MarkerId("destination"),
+                        position: latLongList.last,
+                        infoWindow: InfoWindow(
+                          title: 'Destino',
+                          snippet: 'Lat: ${latLongList.last.latitude} - Long: ${latLongList.last.longitude}',
+                        ),
                       ),
-                    ),
                   },
                   polylines: {
                     Polyline(
@@ -160,9 +358,10 @@ class MapPageState extends State<MapPage> {
                     ),
                   },
                   onMapCreated: (mapController) {
-                    //  mapController.showMarkerInfoWindow(const MarkerId("source"));
-
-                    //_controller.complete(mapController);
+                    _customInfoWindowController.googleMapController = mapController;
+                  },
+                  onCameraMove: (position) {
+                    _customInfoWindowController.onCameraMove!();
                   },
                 ),
                 Padding(
@@ -179,6 +378,7 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 ),
+                CustomInfoWindow(controller: _customInfoWindowController, height: 80, width: 250, offset: 20)
               ],
             ),
     );

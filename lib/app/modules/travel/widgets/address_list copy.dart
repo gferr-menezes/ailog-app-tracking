@@ -49,18 +49,30 @@ class _AddressListState extends State<AddressList> {
                             child: Column(
                               children: [
                                 ListTile(
-                                  leading: Padding(
-                                    padding: const EdgeInsets.only(left: 20),
+                                  leading: SizedBox(
+                                    width: 100,
                                     child: GestureDetector(
-                                      child: CircleAvatar(
-                                        backgroundColor: Colors.indigo,
-                                        child: Text(
-                                          address.passOrder.toString(),
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
+                                      child: Column(
+                                        children: [
+                                          const SizedBox(
+                                            child: Padding(
+                                              padding: EdgeInsets.only(top: 12, left: 2),
+                                              child: Text(
+                                                'TIPO OPERAÇÃO',
+                                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                          SizedBox(
+                                            width: 125,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(top: 4, left: 3),
+                                              child: Text(
+                                                address.typeOperation?.toUpperCase() ?? '',
+                                              ),
+                                            ),
+                                          )
+                                        ],
                                       ),
                                       onTap: () {
                                         if (address.latitude != null && address.longitude != null) {
@@ -70,37 +82,19 @@ class _AddressListState extends State<AddressList> {
                                               'latitude': address.latitude,
                                               'longitude': address.longitude,
                                               'origin': 'address',
-                                              'address_data': address,
                                             },
                                           );
                                         }
                                       },
                                     ),
                                   ),
-                                  title: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        address.typeOperation?.toUpperCase() ?? ' - ',
-                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                                      ),
-                                      address.client == null
-                                          ? const SizedBox.shrink()
-                                          : Text(
-                                              address.client?.name.toUpperCase() ?? '',
-                                              style: const TextStyle(fontSize: 13),
-                                            ),
-                                      Text(
-                                        '${address.city.toUpperCase()} - ${address.state.toUpperCase()}',
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                      address.address == null
-                                          ? const SizedBox.shrink()
-                                          : Text(
-                                              address.address == null ? '' : address.address!.toUpperCase(),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                    ],
+                                  title: Text(
+                                    '${address.city.toUpperCase()} - ${address.state.toUpperCase()}',
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
+                                  subtitle: Text(
+                                    address.address == null ? ' ' : address.address!.toUpperCase(),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   trailing: IconButton(
                                     onPressed: () {
