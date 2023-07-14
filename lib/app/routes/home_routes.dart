@@ -1,4 +1,5 @@
 import 'package:ailog_app_tracking/app/modules/travel/pages/occurrence_photo_page.dart';
+import 'package:ailog_app_tracking/app/modules/travel/pages/vehicle_occurrence_page.dart';
 import 'package:get/get.dart';
 
 import '../modules/document/document_binds.dart';
@@ -42,6 +43,13 @@ class HomeRoutes {
     GetPage(
       name: '/travel/occurrences/photo',
       page: () => const OccurrencePhotoPage(),
+      binding: TravelBinding(),
+      transitionDuration: const Duration(milliseconds: 5),
+      arguments: null,
+    ),
+    GetPage(
+      name: '/travel/vehicle-occurrences',
+      page: () => const VehicleOccurrencePage(),
       binding: TravelBinding(),
       transitionDuration: const Duration(milliseconds: 5),
       arguments: null,

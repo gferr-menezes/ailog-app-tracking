@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:ailog_app_tracking/app/common/ui/widgets/error_location_permission.dart';
 import 'package:ailog_app_tracking/app/modules/travel/pages/rotogram_page.dart';
+import 'package:ailog_app_tracking/app/modules/travel/widgets/occurrence_vehicle_list.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -122,7 +123,7 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
                               ),
                               Expanded(
                                 child: DefaultTabController(
-                                  length: 4,
+                                  length: 5,
                                   child: Scaffold(
                                     appBar: PreferredSize(
                                         preferredSize: const Size.fromHeight(40),
@@ -140,13 +141,13 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
                                                   SizedBox(
                                                     height: 30,
                                                     child: Tab(
-                                                      text: 'ROTOGRAMA',
+                                                      text: 'ENDEREÇOS',
                                                     ),
                                                   ),
                                                   SizedBox(
                                                     height: 30,
                                                     child: Tab(
-                                                      text: 'ENDEREÇOS',
+                                                      text: 'INSTRUÇÕES',
                                                     ),
                                                   ),
                                                   SizedBox(
@@ -161,6 +162,12 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
                                                       text: 'OCORRÊNCIAS',
                                                     ),
                                                   ),
+                                                  SizedBox(
+                                                    height: 30,
+                                                    child: Tab(
+                                                      text: 'OCORRÊNCIAS VEICULO',
+                                                    ),
+                                                  ),
                                                 ],
                                               )
                                             ],
@@ -168,10 +175,13 @@ class _TravelPageState extends State<TravelPage> with WidgetsBindingObserver {
                                         )),
                                     body: TabBarView(
                                       children: [
-                                        const RotogramPage(),
                                         const AddressList(),
+                                        const RotogramPage(),
                                         const TollList(),
                                         OccurrenceList(
+                                          travelApiId: travelController.travel.travelIdApi!,
+                                        ),
+                                        OccurrenceVehicleList(
                                           travelApiId: travelController.travel.travelIdApi!,
                                         ),
                                       ],

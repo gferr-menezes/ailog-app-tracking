@@ -1,3 +1,4 @@
+import 'package:ailog_app_tracking/app/modules/travel/models/rotogram_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +20,7 @@ class TravelController extends GetxController {
   final _loadingGetTolls = false.obs;
   final _loadingInformValuePay = false.obs;
   final _loadingRegisterActionClient = false.obs;
+  final _loadingGetRotograms = false.obs;
 
   final _travel = TravelModel().obs;
   final _addresses = <AddressModel>[].obs;
@@ -228,6 +230,15 @@ class TravelController extends GetxController {
     }
   }
 
+  Future<List<RotogramModel>?> getRotograms({required int travelId}) async {
+    try {
+      loadingGetRotograms = true;
+      return await _travelService.getRotograms(travelId: travelId);
+    } finally {
+      loadingGetRotograms = false;
+    }
+  }
+
   void closeTollListPopMenu() {
     popMenuTollIsVisible.value = false;
     Navigator.of(contextPopMenu!).pop();
@@ -291,4 +302,7 @@ class TravelController extends GetxController {
   set tolls(List<TollModel> value) {
     _tolls.value = value;
   }
+
+  bool get loadingGetRotograms => _loadingGetRotograms.value;
+  set loadingGetRotograms(bool value) => _loadingGetRotograms.value = value;
 }

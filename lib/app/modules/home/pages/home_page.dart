@@ -72,6 +72,18 @@ class _HomePageState extends State<HomePage> {
                               icon: const Icon(Icons.new_releases_sharp),
                               tooltip: 'Registrar ocorrência',
                             ),
+                            IconButton(
+                              onPressed: () {
+                                var travel = travelController.travel;
+                                controller.floatExtended = false;
+                                Get.toNamed(
+                                  '/travel/vehicle-occurrences',
+                                  arguments: {'travel': travel},
+                                );
+                              },
+                              icon: const Icon(Icons.build),
+                              tooltip: 'Registrar ocorrência',
+                            ),
                           ],
                         ),
                         isExtended: controller.floatExtended,

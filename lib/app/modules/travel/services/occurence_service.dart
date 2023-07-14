@@ -4,6 +4,7 @@ import 'package:ailog_app_tracking/app/modules/travel/models/address_model.dart'
 import 'package:ailog_app_tracking/app/modules/travel/models/type_occurence_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/repositories/travel_repository.dart';
 
+import '../models/occurence_vehicle_model.dart';
 import '../models/occurrence_model.dart';
 import '../models/travel_model.dart';
 
@@ -40,6 +41,15 @@ class OccurenceService {
 
   Future<List<OccurrenceModel>> getOccurrences({required String travelApiId}) async {
     final result = await _travelRepository.getOccurrences(travelApiId: travelApiId);
+    return result;
+  }
+
+  Future<void> saveOccurrenceVehicle({required TravelModel travel, required OccurenceVehicleModel occurrence}) async {
+    await _travelRepository.saveOccurrenceVehicle(travel: travel, ocurrence: occurrence);
+  }
+
+  Future<List<OccurenceVehicleModel>> getVehicleOccurrences({required String travelApiId}) async {
+    final result = await _travelRepository.getVehicleOccurrences(travelApiId: travelApiId);
     return result;
   }
 }

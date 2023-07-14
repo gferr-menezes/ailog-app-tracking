@@ -52,7 +52,7 @@ class _SupplyPageState extends State<SupplyPage> {
     final travelId = argumentsRoute['travelId'];
     final travelIdApi = argumentsRoute['travelIdApi'];
 
-    supplyController.getAll(travelId: travelId);
+    supplyController.getAll(travelIdApi: travelIdApi);
 
     return Scaffold(
       backgroundColor: Colors.white,

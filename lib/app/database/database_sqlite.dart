@@ -10,7 +10,7 @@ class DatabaseSQLite {
 
     return await openDatabase(
       databaseFinalPath,
-      version: 10,
+      version: 13,
       onCreate: (Database db, int version) async {
         log('Criando banco de dados versão $version');
 
@@ -126,6 +126,47 @@ class DatabaseSQLite {
               latitude double,
               longitude double,
               ocr_recibo TEXT
+            )
+          ''');
+
+        batch.execute('''
+            CREATE TABLE IF NOT EXISTS rotograms_data (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              travel_id INTEGER NOT NULL,
+              travel_id_api VARCHAR(255),
+              description VARCHAR(255),
+              url_icon VARCHAR(255),
+              distance_traveled_km FLOAT,
+              distance_traveled_formatted VARCHAR(100),
+              travel_time_seconds INTEGER,
+              information_id INTEGER,
+              pass_order INTEGER,
+              value FLOAT,
+              value_discount FLOAT,
+              change_value BOOLEAN,
+              day_start VARCHAR(255),
+              hour_start VARCHAR(255),
+              day_end VARCHAR(255),
+              hour_end VARCHAR(255),
+              value_weekend FLOAT,
+              value_tag_weekend FLOAT,
+              category_vehicle VARCHAR(255),
+              direction_route VARCHAR(255),
+              latitude double,
+              longitude double
+            )
+          ''');
+
+        batch.execute('''
+            CREATE TABLE IF NOT EXISTS occurrence_vehicles (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              travel_id INTEGER NOT NULL,
+              travel_id_api VARCHAR(255),
+              description VARCHAR(255),
+              date_occurrence DATE_TIME,
+              latitude double,
+              longitude double,
+              url_photos TEXT
             )
           ''');
 
@@ -246,6 +287,52 @@ class DatabaseSQLite {
               longitude double,
               ocr_recibo TEXT
             )
+          ''');
+
+          batch.execute('''
+            CREATE TABLE IF NOT EXISTS rotograms_data (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              travel_id INTEGER NOT NULL,
+              travel_id_api VARCHAR(255),
+              description VARCHAR(255),
+              url_icon VARCHAR(255),
+              distance_traveled_km FLOAT,
+              distance_traveled_formatted VARCHAR(100),
+              travel_time_seconds INTEGER,
+              information_id INTEGER,
+              pass_order INTEGER,
+              value FLOAT,
+              value_discount FLOAT,
+              change_value BOOLEAN,
+              day_start VARCHAR(255),
+              hour_start VARCHAR(255),
+              day_end VARCHAR(255),
+              hour_end VARCHAR(255),
+              value_weekend FLOAT,
+              value_tag_weekend FLOAT,
+              category_vehicle VARCHAR(255),
+              direction_route VARCHAR(255),
+              latitude double,
+              longitude double
+            )
+          ''');
+
+          batch.execute('''
+            CREATE TABLE IF NOT EXISTS occurrence_vehicles (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              travel_id INTEGER NOT NULL,
+              travel_id_api VARCHAR(255),
+              description VARCHAR(255),
+              date_occurrence DATE_TIME,
+              latitude double,
+              longitude double,
+              url_photos TEXT
+            )
+          ''');
+
+          // remove table rotograms
+          batch.execute('''
+            DROP TABLE IF EXISTS rotograms
           ''');
 
           var checkColumnExists = await db.rawQuery('''

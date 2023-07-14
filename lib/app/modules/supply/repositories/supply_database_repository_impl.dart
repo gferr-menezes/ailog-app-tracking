@@ -18,7 +18,7 @@ class SupplyDatabaseRepositoryImpl implements SupplyDatabaseRepository {
     }
 
     if (travelIdApi != null) {
-      where = 'travel_id_api = $travelIdApi';
+      where = 'travel_id_api = "$travelIdApi"';
     }
 
     final result = await db.query(

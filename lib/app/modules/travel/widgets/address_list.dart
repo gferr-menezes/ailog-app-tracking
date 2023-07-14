@@ -294,63 +294,124 @@ class _AddressListState extends State<AddressList> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 1, bottom: 10, right: 10),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        children: [
-                                          const SizedBox(
-                                            width: 65,
-                                            child: Text(
-                                              'CHEGADA',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 105,
-                                            child: address.realArrival != null
-                                                ? Padding(
-                                                    padding: const EdgeInsets.only(left: 5),
-                                                    child: Text(
-                                                      DateFormat('dd/MM/yy HH:mm')
-                                                          .format(address.realArrival as DateTime),
+                                    padding: const EdgeInsets.only(left: 1, bottom: 10, right: 10),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              children: [
+                                                SizedBox(
+                                                  width: context.width * 0.30,
+                                                  child: const Text(
+                                                    'PREV. CHEGADA',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
                                                     ),
-                                                  )
-                                                : const Center(
-                                                    child: Text(' - '),
                                                   ),
-                                          ),
-                                        ],
-                                      ),
-                                      Column(
-                                        children: [
-                                          const SizedBox(
-                                            width: 100,
-                                            child: Text(
-                                              'SAIDA',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                                ),
+                                                SizedBox(
+                                                  width: 105,
+                                                  child: address.estimatedArrival != null
+                                                      ? Padding(
+                                                          padding: const EdgeInsets.only(left: 5),
+                                                          child: Text(
+                                                            DateFormat('dd/MM/yy HH:mm')
+                                                                .format(address.estimatedArrival as DateTime),
+                                                          ),
+                                                        )
+                                                      : const Center(
+                                                          child: Text(' - '),
+                                                        ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                          SizedBox(
-                                            child: address.realDeparture != null
-                                                ? Text(DateFormat('dd/MM/yy HH:mm')
-                                                    .format(address.realDeparture as DateTime))
-                                                : const Center(
-                                                    child: Text(' - '),
+                                            Column(
+                                              children: [
+                                                const SizedBox(
+                                                  width: 100,
+                                                  child: Text(
+                                                    'PREV. SAIDA',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
                                                   ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                )
+                                                ),
+                                                SizedBox(
+                                                  child: address.estimatedDeparture != null
+                                                      ? Text(DateFormat('dd/MM/yy HH:mm')
+                                                          .format(address.estimatedDeparture as DateTime))
+                                                      : const Center(
+                                                          child: Text(' - '),
+                                                        ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              children: [
+                                                const SizedBox(
+                                                  width: 65,
+                                                  child: Text(
+                                                    'CHEGADA',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 105,
+                                                  child: address.realArrival != null
+                                                      ? Padding(
+                                                          padding: const EdgeInsets.only(left: 5),
+                                                          child: Text(
+                                                            DateFormat('dd/MM/yy HH:mm')
+                                                                .format(address.realArrival as DateTime),
+                                                          ),
+                                                        )
+                                                      : const Center(
+                                                          child: Text(' - '),
+                                                        ),
+                                                ),
+                                              ],
+                                            ),
+                                            Column(
+                                              children: [
+                                                const SizedBox(
+                                                  width: 100,
+                                                  child: Text(
+                                                    'SAIDA',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  child: address.realDeparture != null
+                                                      ? Text(DateFormat('dd/MM/yy HH:mm')
+                                                          .format(address.realDeparture as DateTime))
+                                                      : const Center(
+                                                          child: Text(' - '),
+                                                        ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ))
                               ],
                             ),
                           );

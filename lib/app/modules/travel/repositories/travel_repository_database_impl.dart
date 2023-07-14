@@ -1,5 +1,8 @@
 import 'dart:developer';
 
+import 'package:ailog_app_tracking/app/modules/travel/models/lat_long_model.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/rotogram_model.dart';
+
 import '../../../database/database_sqlite.dart';
 import '../models/address_model.dart';
 import '../models/geolocation_model.dart';
@@ -86,6 +89,36 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
             'longitude': toll.longitude,
             'value_informed': toll.valueInformed,
             'url_voucher_image': toll.urlVoucherImage,
+          });
+        }
+      }
+
+      // rotograms
+      if (travel.rotograms != null) {
+        for (final rotogram in travel.rotograms!) {
+          await txn.insert('rotograms_data', {
+            'travel_id': travelId,
+            'travel_id_api': travel.travelIdApi,
+            'description': rotogram.description?.toLowerCase(),
+            'url_icon': rotogram.urlIcon,
+            'distance_traveled_km': rotogram.distanceTraveledKm,
+            'distance_traveled_formatted': rotogram.distanceTraveledFormatted,
+            'travel_time_seconds': rotogram.travelTimeSeconds,
+            'information_id': rotogram.informationPoint?.informationId,
+            'pass_order': rotogram.informationPoint?.orderPassage,
+            'value': rotogram.informationPoint?.value,
+            'value_discount': rotogram.informationPoint?.valueDiscount,
+            'change_value': rotogram.informationPoint?.weekend?.changeValue,
+            'day_start': rotogram.informationPoint?.weekend?.dayStart,
+            'hour_start': rotogram.informationPoint?.weekend?.hourStart,
+            'day_end': rotogram.informationPoint?.weekend?.dayEnd,
+            'hour_end': rotogram.informationPoint?.weekend?.hourEnd,
+            'value_weekend': rotogram.informationPoint?.weekend?.value,
+            'value_tag_weekend': rotogram.informationPoint?.weekend?.valueTag,
+            'category_vehicle': rotogram.informationPoint?.categoryVehicle,
+            'direction_route': rotogram.directionRoute?.name,
+            'latitude': rotogram.latLng?.latitude,
+            'longitude': rotogram.latLng?.longitude,
           });
         }
       }
@@ -351,6 +384,68 @@ class TravelRepositoryDatabaseImpl implements TravelRepositoryDatabase {
       }
     } catch (e) {
       log('registerDepartureClient error: $e');
+      throw Exception(e);
+    }
+  }
+
+  @override
+  Future<List<RotogramModel>?> getRotograms({required int travelId}) async {
+    try {
+      final db = await DatabaseSQLite().openConnection();
+      final rotograms = <RotogramModel>[];
+      final rotogramsData = await db.query('rotograms_data', where: 'travel_id = ?', whereArgs: [travelId]);
+
+      if (rotogramsData.isNotEmpty) {
+        for (var rotogram in rotogramsData) {
+          rotograms.add(
+            RotogramModel(
+              description: rotogram['description'] != null ? rotogram['description'] as String : null,
+              urlIcon: rotogram['url_icon'] != null ? rotogram['url_icon'] as String : null,
+              distanceTraveledKm:
+                  rotogram['distance_traveled_km'] != null ? rotogram['distance_traveled_km'] as double : null,
+              travelTimeSeconds:
+                  rotogram['travel_time_seconds'] != null ? rotogram['travel_time_seconds'] as int : null,
+              distanceTraveledFormatted: rotogram['distance_traveled_formatted'] != null
+                  ? rotogram['distance_traveled_formatted'] as String
+                  : null,
+              directionRoute: rotogram['direction_route'] != null
+                  ? DirectionRoute.values.firstWhere((e) => e.name == rotogram['direction_route'])
+                  : null,
+              id: rotogram['id'] != null ? rotogram['id'] as int : null,
+              informationPoint: rotogram['information_id'] != null
+                  ? InformationPointRotogramModel(
+                      informationId: rotogram['information_id'] as int,
+                      orderPassage: rotogram['pass_order'] as int,
+                      value: rotogram['value'] as double,
+                      valueDiscount: rotogram['value_discount'] as double,
+                      weekend: ValueTollWeekModel(
+                        changeValue: rotogram['change_value'] == 0 ? false : true,
+                        dayStart: rotogram['day_start'] as String?,
+                        hourStart: rotogram['hour_start'] as String?,
+                        dayEnd: rotogram['day_end'] as String?,
+                        hourEnd: rotogram['hour_end'] as String?,
+                        value: rotogram['value_weekend'] as double,
+                        valueTag: rotogram['value_tag_weekend'] as double?,
+                      ),
+                      categoryVehicle: rotogram['category_vehicle'] as String?,
+                    )
+                  : null,
+              travelId: rotogram['travel_id'] as int?,
+              travelIdApi: rotogram['travel_id_api'] as String?,
+              latLng: rotogram['latitude'] != null && rotogram['longitude'] != null
+                  ? LatLongModel(
+                      latitude: rotogram['latitude'] as double,
+                      longitude: rotogram['longitude'] as double,
+                    )
+                  : null,
+            ),
+          );
+        }
+      }
+
+      return rotogramsData.isEmpty ? null : rotograms;
+    } catch (e) {
+      log('getRotograms error: $e');
       throw Exception(e);
     }
   }

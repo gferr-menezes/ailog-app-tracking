@@ -4,6 +4,7 @@ import 'package:ailog_app_tracking/app/modules/travel/models/address_model.dart'
 import 'package:ailog_app_tracking/app/modules/travel/models/occurrence_model.dart';
 
 import '../models/geolocation_model.dart';
+import '../models/occurence_vehicle_model.dart';
 import '../models/travel_model.dart';
 import '../models/type_occurence_model.dart';
 
@@ -26,4 +27,7 @@ abstract class TravelRepository {
   Future<List<OccurrenceModel>> getOccurrences({required String travelApiId});
   Future<void> sendRegisterArrivalClient({required TravelModel travel, required AddressModel address});
   Future<void> sendRegisterDepartureClient({required TravelModel travel, required AddressModel address});
+  Future<void> saveOccurrenceVehicle({required TravelModel travel, required OccurenceVehicleModel ocurrence});
+  Future<List<OccurenceVehicleModel>> getVehicleOccurrences({required String travelApiId});
+  Future<void> startTravel({required String travelApiId});
 }

@@ -17,7 +17,7 @@ class FormTravel extends StatelessWidget {
     final TravelController travelController = Get.find<TravelController>();
 
     //plateEC.text = 'DOO-8946';
-    plateEC.text = 'XYZ2044';
+    plateEC.text = 'AAA2222';
 
     return Form(
       key: formKey,

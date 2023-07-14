@@ -72,7 +72,7 @@ class TravelData extends StatelessWidget {
                           child: SizedBox(
                             width: 90,
                             child: Text(
-                              travel.vpoEmitName.toString().toUpperCase(),
+                              travel.vpoEmitName == null ? ' - ' : travel.vpoEmitName.toString().toUpperCase(),
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 15, overflow: TextOverflow.ellipsis),
                             ),

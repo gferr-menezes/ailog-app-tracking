@@ -1,4 +1,5 @@
 import 'package:ailog_app_tracking/app/modules/travel/models/occurrence_model.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/rotogram_model.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/response_status_api.dart';
@@ -81,22 +82,22 @@ class TravelService {
           ));
         }
 
-        final clientData = travel['cliente'];
         final addressData = travel['enderecos'] as List;
 
-        if (clientData != null) {
-          client = ClientModel(
-            name: clientData['nome'].toString().toLowerCase(),
-            cellPhone: clientData['celular'],
-            documentNumber: clientData['documento']['numero'],
-            documentNumberWithoutMask: clientData['documento']['numeroSemMascara'],
-            phone: clientData['fone'],
-            typeDocument: clientData['documento']['tipo']?.toString().toLowerCase(),
-            travelIdApi: travel['idViagem'],
-          );
-        }
-
         for (var address in addressData) {
+          final clientData = address['cliente'];
+          if (clientData != null) {
+            client = ClientModel(
+              name: clientData['nome'].toString().toLowerCase(),
+              cellPhone: clientData['celular'],
+              documentNumber: clientData['documento']['numero'],
+              documentNumberWithoutMask: clientData['documento']['numeroSemMascara'],
+              phone: clientData['fone'],
+              typeDocument: clientData['documento']['tipo']?.toString().toLowerCase(),
+              travelIdApi: travel['idViagem'],
+            );
+          }
+
           var cityData = address['endereco']['cidade'];
           var latLongData = address['endereco']['latLng'];
 
@@ -145,6 +146,17 @@ class TravelService {
           );
         }
 
+        /** rotograms */
+        final rotogramJson = travel['rotograma']?['instrucoes'] as List?;
+
+        List<RotogramModel> rotograms = [];
+
+        if (rotogramJson != null) {
+          for (var rotogram in rotogramJson) {
+            rotograms.add(RotogramModel.fromJson(rotogram));
+          }
+        }
+
         travels.add(
           TravelModel(
             plate: plate.toLowerCase(),
@@ -157,6 +169,7 @@ class TravelService {
             status: StatusTravel.inProgress.name,
             addresses: addresses,
             tolls: tolls,
+            rotograms: rotograms,
           ),
         );
       }
@@ -179,6 +192,7 @@ class TravelService {
     travel.tolls = tollsFiltered;
 
     await _travelRepositoryDatabase.insertTravel(travel);
+    await _travelRepository.startTravel(travelApiId: travel.travelIdApi!);
   }
 
   Future<List<TravelModel>?> getTravels({String? plate, String? status, int? id}) async {
@@ -240,5 +254,9 @@ class TravelService {
   Future<void> registerDepartureClient({required TravelModel travel, required AddressModel address}) async {
     await _travelRepository.sendRegisterDepartureClient(travel: travel, address: address);
     await _travelRepositoryDatabase.registerDepartureClient(address: address);
+  }
+
+  Future<List<RotogramModel>?> getRotograms({required int travelId}) async {
+    return await _travelRepositoryDatabase.getRotograms(travelId: travelId);
   }
 }

@@ -4,10 +4,10 @@ import 'dart:typed_data';
 
 import 'package:ailog_app_tracking/app/modules/travel/models/address_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/client_model.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/occurence_vehicle_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/occurrence_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/type_occurence_model.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/rest_client.dart';
@@ -408,6 +408,86 @@ class TravelRepositoryImpl implements TravelRepository {
       }
     } catch (e) {
       log('error_register_arrival_client: $e');
+    }
+  }
+
+  @override
+  Future<void> saveOccurrenceVehicle({required TravelModel travel, required OccurenceVehicleModel ocurrence}) async {
+    try {
+      final dataSend = {
+        "idViagem": travel.travelIdApi,
+        "ocorrencia": {
+          "descricao": ocurrence.description,
+          "dataHora": DateFormat('dd/MM/yyyy HH:mm:ss').format(ocurrence.dateOccurrence ?? DateTime.now()),
+          "latLng": {
+            "latitude": ocurrence.latitude,
+            "longitude": ocurrence.longitude,
+          },
+          "urlFotos": ocurrence.urlPhotos,
+        }
+      };
+
+      final response = await _restClient.post('/tracking/viagem/veiculo/addOcorrencia', jsonEncode(dataSend));
+
+      final result = response.body;
+      if (result == null || result['status'] != 'SUCESSO') {
+        throw Exception(result == null ? 'error_communication_backend' : result['status']);
+      }
+      print("#################response.body: ${response.body}");
+    } catch (e) {
+      log('error_save_occurrence_vehicle: $e');
+      throw Exception('error_save_occurrence_vehicle');
+    }
+  }
+
+  @override
+  Future<List<OccurenceVehicleModel>> getVehicleOccurrences({required String travelApiId}) async {
+    try {
+      final response = await _restClient.post('/tracking/viagem/iniciar', {
+        'idViagem': travelApiId,
+      });
+
+      final result = response.body;
+      if (result == null || result['status'] != 'SUCESSO') {
+        throw Exception(result == null ? 'error_communication_backend' : result['status']);
+      }
+
+      var ocorrenciasVeiculo = result['viagem']['ocorrenciasVeiculo'];
+
+      if (ocorrenciasVeiculo != null) {
+        final List<OccurenceVehicleModel> occurrences = [];
+
+        for (var item in ocorrenciasVeiculo) {
+          final occurrence = OccurenceVehicleModel.fromJson(item);
+
+          occurrences.add(occurrence);
+        }
+
+        return occurrences;
+      }
+
+      return [];
+    } catch (e) {
+      log('error_get_vehicle_occurrences: $e');
+      throw Exception('error_get_vehicle_occurrences');
+    }
+  }
+
+  @override
+  Future<void> startTravel({required String travelApiId}) async {
+    try {
+      final response = await _restClient.post('/tracking/viagem/iniciar', {
+        'idViagem': travelApiId,
+      });
+
+      final result = response.body;
+      print("#################response.body: ${response.body}");
+      if (result == null || result['status'] != 'SUCESSO') {
+        throw Exception(result == null ? 'error_communication_backend' : result['status']);
+      }
+    } catch (e) {
+      log('error_start_travel: $e');
+      throw Exception('error_start_travel');
     }
   }
 }

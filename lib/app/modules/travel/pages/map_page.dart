@@ -1,5 +1,7 @@
 import 'package:ailog_app_tracking/app/modules/travel/models/address_model.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/occurence_vehicle_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/occurrence_model.dart';
+import 'package:ailog_app_tracking/app/modules/travel/models/rotogram_model.dart';
 import 'package:ailog_app_tracking/app/modules/travel/models/toll_model.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +59,9 @@ class MapPageState extends State<MapPage> {
     AddressModel? address;
     TollModel? toll;
     OccurrenceModel? occurrence;
+    RotogramModel? rotogram;
+    double heightWindow = 120;
+    OccurenceVehicleModel? occurenceVehicle;
 
     String? originPage;
     if (argumentsPage != null) {
@@ -68,7 +73,14 @@ class MapPageState extends State<MapPage> {
 
     late List<LatLng> latLongList = [];
 
-    if (originPage == null || originPage != 'address' && originPage != 'toll_list' && originPage != 'occurrence_list') {
+    print('argumentsPage: $argumentsPage');
+
+    if (originPage == null ||
+        originPage != 'address' &&
+            originPage != 'toll_list' &&
+            originPage != 'occurrence_list' &&
+            originPage != 'rotogram' &&
+            originPage != 'occurrence_vehicle_list') {
       for (var geolocation in geolocations) {
         latLongList.add(LatLng(geolocation.latitude, geolocation.longitude));
       }
@@ -83,6 +95,24 @@ class MapPageState extends State<MapPage> {
 
       if (originPage == 'occurrence_list') {
         occurrence = argumentsPage?['occurrence_data'];
+      }
+
+      if (originPage == 'occurrence_vehicle_list') {
+        occurenceVehicle = argumentsPage?['occurrence_vehicle_list'];
+      }
+
+      if (originPage == 'rotogram') {
+        rotogram = argumentsPage?['rotogram_data'];
+      }
+
+      if (originPage == 'rotogram') {
+        setState(() {
+          if (rotogram?.informationPoint?.value != null && rotogram?.informationPoint?.value != 0) {
+            heightWindow = 90;
+          } else {
+            heightWindow = 60;
+          }
+        });
       }
 
       latLongList.add(LatLng(argumentsPage?['latitude'], argumentsPage?['longitude']));
@@ -330,7 +360,122 @@ class MapPageState extends State<MapPage> {
                           }
                         },
                       ),
-                    if (originPage != 'address' && originPage != 'toll_list' && originPage != 'occurrence_list')
+                    if (originPage == 'occurrence_vehicle_list')
+                      Marker(
+                        markerId: const MarkerId("source"),
+                        position: latLongList.first,
+                        onTap: () {
+                          setState(() {
+                            _infoWindowShown = !_infoWindowShown;
+                          });
+
+                          if (_infoWindowShown == true) {
+                            _customInfoWindowController.addInfoWindow!(
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  height: 300,
+                                  width: 200,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        width: 300,
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(
+                                                '${occurenceVehicle!.description?.toUpperCase()}',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                              child: Text(
+                                                DateFormat('dd/MM/yyyy HH:mm').format(occurenceVehicle.dateOccurrence!),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                latLongList.first);
+                          } else {
+                            setState(() {
+                              _infoWindowShown = false;
+                            });
+                            _customInfoWindowController.hideInfoWindow!();
+                          }
+                        },
+                      ),
+                    if (originPage == 'rotogram')
+                      Marker(
+                        markerId: const MarkerId("source"),
+                        position: latLongList.first,
+                        onTap: () {
+                          setState(() {
+                            _infoWindowShown = !_infoWindowShown;
+                          });
+
+                          if (_infoWindowShown == true) {
+                            _customInfoWindowController.addInfoWindow!(
+                                Container(
+                                  height: 100,
+                                  width: 250,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            '${rotogram!.description?.toUpperCase()}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      rotogram.informationPoint?.value == null || rotogram.informationPoint?.value == 0
+                                          ? const SizedBox.shrink()
+                                          : Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Text('Valor: R\$ ${rotogram.informationPoint?.value ?? 0}')),
+                                    ],
+                                  ),
+                                ),
+                                latLongList.first);
+                          } else {
+                            setState(() {
+                              _infoWindowShown = false;
+                            });
+                            _customInfoWindowController.hideInfoWindow!();
+                          }
+                        },
+                      ),
+                    if (originPage != 'address' &&
+                        originPage != 'toll_list' &&
+                        originPage != 'occurrence_list' &&
+                        originPage != 'rotogram' &&
+                        originPage != 'occurrence_vehicle_list')
                       Marker(
                         markerId: const MarkerId("source"),
                         position: latLongList.first,
@@ -339,7 +484,11 @@ class MapPageState extends State<MapPage> {
                           snippet: 'Lat: ${latLongList.first.latitude} - Long: ${latLongList.first.longitude}',
                         ),
                       ),
-                    if (originPage != 'address' && originPage != 'toll_list' && originPage != 'occurrence_list')
+                    if (originPage != 'address' &&
+                        originPage != 'toll_list' &&
+                        originPage != 'occurrence_list' &&
+                        originPage != 'rotogram' &&
+                        originPage != 'occurrence_vehicle_list')
                       Marker(
                         markerId: const MarkerId("destination"),
                         position: latLongList.last,
@@ -378,7 +527,7 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 ),
-                CustomInfoWindow(controller: _customInfoWindowController, height: 80, width: 250, offset: 20)
+                CustomInfoWindow(controller: _customInfoWindowController, height: heightWindow, width: 250, offset: 20)
               ],
             ),
     );
@@ -389,8 +538,12 @@ class MapPageState extends State<MapPage> {
 
     if (address != null) {
       if (address.address != null) {
-        textAddress =
-            '${address.address?.toUpperCase()}, ${address.number} - ${address.city}, ${address.city.toUpperCase()} - ${address.state.toUpperCase()}';
+        if (address.address != null && address.address != '') {
+          textAddress =
+              '${address.address?.toUpperCase()}, ${address.number} - ${address.city}, ${address.city.toUpperCase()} - ${address.state.toUpperCase()}';
+        } else {
+          textAddress = '${address.city.toUpperCase()} - ${address.state.toUpperCase()}';
+        }
       } else {
         textAddress = '${address.city.toUpperCase()} - ${address.state.toUpperCase()}';
       }

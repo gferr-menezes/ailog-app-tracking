@@ -1,3 +1,5 @@
+import 'package:ailog_app_tracking/app/modules/travel/models/rotogram_model.dart';
+
 import '../models/address_model.dart';
 import '../models/geolocation_model.dart';
 import '../models/toll_model.dart';
@@ -15,4 +17,5 @@ abstract class TravelRepositoryDatabase {
   Future<void> updateToll({required TollModel toll});
   Future<void> registerArrivalClient({required AddressModel address});
   Future<void> registerDepartureClient({required AddressModel address});
+  Future<List<RotogramModel>?> getRotograms({required int travelId});
 }
